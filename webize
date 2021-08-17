@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -eu
+set -u
 
 usage() {
     echo 'Usage: ./webize.sh [OPTIONS]'
@@ -86,43 +86,44 @@ if [ -z "$dirs" ]; then
 fi
 
 # Generate index.htm in each directory
-echo "$dirs" | while read -r d; do
-    indexHtm="$d/index.htm"
-    images=$( ls -p "$d" | grep -v '/' | grep -E '\.png|\.jpg|\.webp|\.svg' )
+if [ -n "$GALLERY" ]; then
+    echo "$dirs" | while read -r d; do
+        indexHtm="$d/index.htm"
+        images=$( ls -p "$d" | grep -v '/' | grep -E '\.png|\.jpg|\.webp|\.svg' )
 
-    echo '
-    <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <style>
-            html { width: 100%; height: 100%; background: #000; font-size: 0; }
-            body { margin: 0; }
-            menu { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; display: block; padding: 1vw; background: #000; opacity: 1; text-align: center; user-select: none; }
-            menu fullscreen, menu stretchx, menu stretchy, menu tilesmaller, menu tilelarger, menu imagelabeller, menu pin { display: inline-block; margin-right: 2vw; /*width: calc( 4vw + 2px ); height: calc( 4vw + 2px ); border: 1px solid #fff; border-radius: 50%; */ padding: 1vw; font-size: 2vw; color: #fff; cursor: pointer; }
-            content:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
-            content { display: block; text-align: center; }
-            gallery { display: inline-block; width: 100%; text-align: center; vertical-align: middle; }
-            imageholder { position: relative; display: inline-block; margin: 0 auto; width: calc( 100% / 7 ); }
-            imageholder info { position: absolute; top: 0; left: 0; right: 0; z-index: 0; }
-            imageholder info label { display: block; background: #000; color: #fff; font-size: 1vw; font-family: monospace; }
-            imageholder img { display: inline-block; margin: 0 auto; width: 100%; height: auto; }
-        </style>
-    </head>
-    <body>
-        <menu>
-            <fullscreen>💻</fullscreen>
-            <stretchx>↕️</stretchx>
-            <stretchy>↔️</stretchy>
-            <tilesmaller>🐜</tilesmaller>
-            <tilelarger>🦕</tilelarger>
-            <imagelabeller>🏷</imagelabeller>
-            <pin>📌</pin>
-        </menu>
-        <content>
-            <gallery>
+        echo '
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <style>
+        html { width: 100%; height: 100%; background: #000; font-size: 0; }
+        body { margin: 0; }
+        menu { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; display: block; padding: 1vw; background: #000; opacity: 1; text-align: center; user-select: none; }
+        menu fullscreen, menu stretchx, menu stretchy, menu tilesmaller, menu tilelarger, menu imagelabeller, menu pin { display: inline-block; margin-right: 2vw; /*width: calc( 4vw + 2px ); height: calc( 4vw + 2px ); border: 1px solid #fff; border-radius: 50%; */ padding: 1vw; font-size: 2vw; color: #fff; cursor: pointer; }
+        content:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
+        content { display: block; text-align: center; }
+        gallery { display: inline-block; width: 100%; text-align: center; vertical-align: middle; }
+        imageholder { position: relative; display: inline-block; margin: 0 auto; width: calc( 100% / 7 ); }
+        imageholder info { position: absolute; top: 0; left: 0; right: 0; z-index: 0; }
+        imageholder info label { display: block; background: #000; color: #fff; font-size: 1vw; font-family: monospace; }
+        imageholder img { display: inline-block; margin: 0 auto; width: 100%; height: auto; }
+    </style>
+</head>
+<body>
+    <menu>
+        <fullscreen>💻</fullscreen>
+        <stretchx>↕️</stretchx>
+        <stretchy>↔️</stretchy>
+        <tilesmaller>🐜</tilesmaller>
+        <tilelarger>🦕</tilelarger>
+        <imagelabeller>🏷</imagelabeller>
+        <pin>📌</pin>
+    </menu>
+    <content>
+        <gallery>
     ' > "$d/index.htm"
-    echo "$images" | while read -r i; do
-        echo "
+        echo "$images" | while read -r i; do
+            echo "
                 <imageholder>
                     <info>
                         <label>$i</label>
@@ -130,227 +131,238 @@ echo "$dirs" | while read -r d; do
                     <img src=\"$i\" />
                 </imageholder>
             " >> "$indexHtm"
-    done
-    echo '
-            </gallery>
-        </content>
-        <script>
-            var menu = (function() {
-                var rootElement = document.getElementsByTagName("menu")[0];
-                var isPinned = true;
+        done
+        echo '
+        </gallery>
+    </content>
+    <script>
+        var menu = (function() {
+            var rootElement = document.getElementsByTagName("menu")[0];
+            var isPinned = true;
 
-                rootElement.addEventListener("mouseenter", function(e) {
-                    if (isPinned) {
-                        rootElement.style.opacity = "1";
-                    }else {
-                        rootElement.style.opacity = "1";
-                    }
-                });
-                rootElement.addEventListener("mouseleave", function(e) {
-                    if (isPinned) {
-                        rootElement.style.opacity = "1";
-                    }else {
-                        rootElement.style.opacity = "0";
-                    }
-                });
-                rootElement.getElementsByTagName("fullscreen")[0].addEventListener("click", function(e) {
-                    document.documentElement.requestFullscreen();
-                });
-                rootElement.getElementsByTagName("stretchx")[0].addEventListener("click", function(e) {
-                    gallery.stretchx();
-                });
-                rootElement.getElementsByTagName("stretchy")[0].addEventListener("click", function(e) {
-                    gallery.stretchy();
-                });
-                rootElement.getElementsByTagName("tilesmaller")[0].addEventListener("click", function(e) {
-                    gallery.tilesmaller();
-                });
-                rootElement.getElementsByTagName("tilelarger")[0].addEventListener("click", function(e) {
-                    gallery.tilelarger();
-                });
-                rootElement.getElementsByTagName("imagelabeller")[0].addEventListener("click", function(e) {
-                    var imagelabeller = document.getElementsByTagName("imagelabeller")[0];
-                    if (gallery.isImagesLabelled) {
-                        isPinned = true;
-                        gallery.isImagesLabelled = false;
-                        rootElement.style.opacity = "";
-                        imagelabeller.style.opacity = "0.5";
-                    }else {
-                        gallery.isImagesLabelled = true;
-                        isPinned = false;
-                        rootElement.style.opacity = "";
-                        imagelabeller.style.opacity = "1.0";
-                    }
-                });
-                rootElement.getElementsByTagName("pin")[0].addEventListener("click", function(e) {
-                    var pin = document.getElementsByTagName("pin")[0];
-                    if (isPinned) {
-                        isPinned = false;
-                        rootElement.style.opacity = "";
-                        pin.style.opacity = "0.5";
-                    }else {
-                        isPinned = true;
-                        rootElement.style.opacity = "";
-                        pin.style.opacity = "";
-                    }
-                });
-
-                return {
-
+            rootElement.addEventListener("mouseenter", function(e) {
+                if (isPinned) {
+                    rootElement.style.opacity = "1";
+                }else {
+                    rootElement.style.opacity = "1";
                 }
-            })();
+            });
+            rootElement.addEventListener("mouseleave", function(e) {
+                if (isPinned) {
+                    rootElement.style.opacity = "1";
+                }else {
+                    rootElement.style.opacity = "0";
+                }
+            });
+            rootElement.getElementsByTagName("fullscreen")[0].addEventListener("click", function(e) {
+                document.documentElement.requestFullscreen();
+            });
+            rootElement.getElementsByTagName("stretchx")[0].addEventListener("click", function(e) {
+                gallery.stretchx();
+            });
+            rootElement.getElementsByTagName("stretchy")[0].addEventListener("click", function(e) {
+                gallery.stretchy();
+            });
+            rootElement.getElementsByTagName("tilesmaller")[0].addEventListener("click", function(e) {
+                gallery.tilesmaller();
+            });
+            rootElement.getElementsByTagName("tilelarger")[0].addEventListener("click", function(e) {
+                gallery.tilelarger();
+            });
+            rootElement.getElementsByTagName("imagelabeller")[0].addEventListener("click", function(e) {
+                var imagelabeller = document.getElementsByTagName("imagelabeller")[0];
+                if (gallery.isImagesLabelled) {
+                    isPinned = true;
+                    gallery.isImagesLabelled = false;
+                    rootElement.style.opacity = "";
+                    imagelabeller.style.opacity = "0.5";
+                }else {
+                    gallery.isImagesLabelled = true;
+                    isPinned = false;
+                    rootElement.style.opacity = "";
+                    imagelabeller.style.opacity = "1.0";
+                }
+            });
+            rootElement.getElementsByTagName("pin")[0].addEventListener("click", function(e) {
+                var pin = document.getElementsByTagName("pin")[0];
+                if (isPinned) {
+                    isPinned = false;
+                    rootElement.style.opacity = "";
+                    pin.style.opacity = "0.5";
+                }else {
+                    isPinned = true;
+                    rootElement.style.opacity = "";
+                    pin.style.opacity = "";
+                }
+            });
 
-            var gallery = (function() {
-                var rootElement = document.getElementsByTagName("gallery")[0];
+            return {
 
-                // Defaults
-                var tileFactor = 7;
-                const minTileFactor = 2;
-                const maxTileFactor = 10;
-                var isTiled = true;
-                var isImagesLabelled = true;
+            }
+        })();
 
-                var images = rootElement.getElementsByTagName("img");
-                var activeImageIndex = 0;
+        var gallery = (function() {
+            var rootElement = document.getElementsByTagName("gallery")[0];
 
-                var scrollToActiveImage = function() {
-                    console.log("Scrolling to active image, index: " + activeImageIndex + ", offsetTop: " + images[activeImageIndex].parentNode.offsetTop);
-                    window.scroll(0, images[activeImageIndex].parentNode.offsetTop);
-                };
+            // Defaults
+            var tileFactor = 7;
+            const minTileFactor = 2;
+            const maxTileFactor = 10;
+            var isTiled = true;
+            var isImagesLabelled = true;
 
-                // Set element of interest while scrolling
-                rootElement.addEventListener("wheel", function(e) {
-                    for (var i = images.length - 1; i > 0; i--) {
-                        if (images[i].parentNode.offsetTop < window.scrollY) {
-                            console.log("Setting active image: " + i);
-                            activeImageIndex = i;
-                            break;
-                        }
+            var images = rootElement.getElementsByTagName("img");
+            var activeImageIndex = 0;
+
+            var scrollToActiveImage = function() {
+                console.log("Scrolling to active image, index: " + activeImageIndex + ", offsetTop: " + images[activeImageIndex].parentNode.offsetTop);
+                window.scroll(0, images[activeImageIndex].parentNode.offsetTop);
+            };
+
+            // Set element of interest while scrolling
+            rootElement.addEventListener("wheel", function(e) {
+                for (var i = images.length - 1; i > 0; i--) {
+                    if (images[i].parentNode.offsetTop < window.scrollY) {
+                        console.log("Setting active image: " + i);
+                        activeImageIndex = i;
+                        break;
                     }
-                });
+                }
+            });
 
-                // Set as element of interest while clicking or focusing
-                var setActiveImageIndexHandler = function(e) {
-                    var ele = event.target || event.srcElement;
-                    var imageholder = ele.parentNode;
-                    activeImageIndex = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
-                    console.log("Set active image: " + activeImageIndex);
-                    console.log("Selected image: " + activeImageIndex);
-                    stretchy();
-                };
-                // var showActiveImageLabelHandler = function(e) {
-                //     if (isImagesLabelled) {
-                //         var ele = event.target || event.srcElement;
-                //         var imageholder = ele.parentNode;
-                //         imageholder.getElementsByTagName("label")[0].style.fontSize = "1vw";
-                //     }
-                // };
-                // var hideActiveImageLabelHandler = function(e) {
-                //     if (!isImagesLabelled) {
-                //         var ele = event.target || event.srcElement;
-                //         var imageholder = ele.parentNode;
-                //         imageholder.getElementsByTagName("label")[0].style.fontSize = "0";
-                //     }
-                // };
+            // Set as element of interest while clicking or focusing
+            var setActiveImageIndexHandler = function(e) {
+                var ele = event.target || event.srcElement;
+                var imageholder = ele.parentNode;
+                activeImageIndex = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
+                console.log("Set active image: " + activeImageIndex);
+                console.log("Selected image: " + activeImageIndex);
+                stretchy();
+            };
+            // var showActiveImageLabelHandler = function(e) {
+            //     if (isImagesLabelled) {
+            //         var ele = event.target || event.srcElement;
+            //         var imageholder = ele.parentNode;
+            //         imageholder.getElementsByTagName("label")[0].style.fontSize = "1vw";
+            //     }
+            // };
+            // var hideActiveImageLabelHandler = function(e) {
+            //     if (!isImagesLabelled) {
+            //         var ele = event.target || event.srcElement;
+            //         var imageholder = ele.parentNode;
+            //         imageholder.getElementsByTagName("label")[0].style.fontSize = "0";
+            //     }
+            // };
+            for (var i = 0; i < images.length; i++) {
+                images[i].addEventListener("click", setActiveImageIndexHandler);
+                images[i].addEventListener("focus", setActiveImageIndexHandler);
+
+                // images[i].addEventListener("click", showActiveImageLabelHandler);
+                // images[i].addEventListener("focus", showActiveImageLabelHandler);
+                // images[i].addEventListener("mouseenter", showActiveImageLabelHandler);
+
+                // images[i].addEventListener("focusout", hideActiveImageLabelHandler);
+                // images[i].addEventListener("focusout", hideActiveImageLabelHandler);
+                // images[i].addEventListener("mouseleave", hideActiveImageLabelHandler);
+            }
+
+            var stretchx = function() {
                 for (var i = 0; i < images.length; i++) {
-                    images[i].addEventListener("click", setActiveImageIndexHandler);
-                    images[i].addEventListener("focus", setActiveImageIndexHandler);
-
-                    // images[i].addEventListener("click", showActiveImageLabelHandler);
-                    // images[i].addEventListener("focus", showActiveImageLabelHandler);
-                    // images[i].addEventListener("mouseenter", showActiveImageLabelHandler);
-
-                    // images[i].addEventListener("focusout", hideActiveImageLabelHandler);
-                    // images[i].addEventListener("focusout", hideActiveImageLabelHandler);
-                    // images[i].addEventListener("mouseleave", hideActiveImageLabelHandler);
+                    images[i].parentNode.style.display = "inline-block";
+                    images[i].parentNode.style.width = "100%";
+                    images[i].style.width = "100%";
+                    images[i].style.height = "auto";
                 }
+                isTiled = false;
+                scrollToActiveImage();
+            };
 
-                var stretchx = function() {
-                    for (var i = 0; i < images.length; i++) {
-                        images[i].parentNode.style.display = "inline-block";
-                        images[i].parentNode.style.width = "100%";
-                        images[i].style.width = "100%";
-                        images[i].style.height = "auto";
-                    }
-                    isTiled = false;
-                    scrollToActiveImage();
-                };
-
-                var stretchy = function() {
-                    for (var i = 0; i < images.length; i++) {
-                        images[i].parentNode.style.display = "inline-block";
-                        images[i].parentNode.style.width = "100%";
-                        images[i].style.width = "auto";
-                        images[i].style.height = "100vh";
-                    }
-                    isTiled = false;
-                    scrollToActiveImage();
-                };
-
-                var tilesmaller = function() {
-                    if (!isTiled) {
-                        isTiled = true;
-                    }else {
-                        tileFactor = tileFactor === maxTileFactor ? maxTileFactor : tileFactor + 1;
-                    }
-                    for (var i = 0; i < images.length; i++) {
-                        images[i].parentNode.style.display = "inline-block";
-                        images[i].parentNode.style.width = "calc(100% / " + tileFactor + ")";
-                        images[i].style.width = "100%";
-                        images[i].style.height = "auto";
-                    }
-                    isTiled = true;
-                };
-
-                var tilelarger = function() {
-                    if (!isTiled) {
-                        isTiled = true;
-                    }else {
-                        tileFactor = tileFactor === minTileFactor ? minTileFactor : tileFactor - 1;
-                    }
-                    for (var i = 0; i < images.length; i++) {
-                        images[i].parentNode.style.display = "inline-block";
-                        images[i].parentNode.style.width = "calc(100% / " + tileFactor + ")";
-                        images[i].style.width = "100%";
-                        images[i].style.height = "auto";
-                    }
-                    isTiled = true;
+            var stretchy = function() {
+                for (var i = 0; i < images.length; i++) {
+                    images[i].parentNode.style.display = "inline-block";
+                    images[i].parentNode.style.width = "100%";
+                    images[i].style.width = "auto";
+                    images[i].style.height = "100vh";
                 }
+                isTiled = false;
+                scrollToActiveImage();
+            };
 
-                var showAllImageLabels = function() {
-                    for (var i = 0; i < images.length; i++) {
-                        var imageholder = images[i].parentNode;
-                        imageholder.getElementsByTagName("label")[0].style.fontSize = "1vw";
-                    }
-                };
-                var hideAllImageLabels = function() {
-                    for (var i = 0; i < images.length; i++) {
-                        var imageholder = images[i].parentNode;
-                        imageholder.getElementsByTagName("label")[0].style.fontSize = "0";
-                    }
-                };
+            var tilesmaller = function() {
+                if (!isTiled) {
+                    isTiled = true;
+                }else {
+                    tileFactor = tileFactor === maxTileFactor ? maxTileFactor : tileFactor + 1;
+                }
+                for (var i = 0; i < images.length; i++) {
+                    images[i].parentNode.style.display = "inline-block";
+                    images[i].parentNode.style.width = "calc(100% / " + tileFactor + ")";
+                    images[i].style.width = "100%";
+                    images[i].style.height = "auto";
+                }
+                isTiled = true;
+            };
 
-                return {
-                    stretchx: stretchx,
-                    stretchy: stretchy,
-                    tilesmaller: tilesmaller,
-                    tilelarger: tilelarger,
-                    get isImagesLabelled() {
-                        return isImagesLabelled;
-                    },
-                    set isImagesLabelled(value) {
-                        isImagesLabelled = value;
-                        if (isImagesLabelled) {
-                            showAllImageLabels();
-                        }else {
-                            hideAllImageLabels();
-                        }
+            var tilelarger = function() {
+                if (!isTiled) {
+                    isTiled = true;
+                }else {
+                    tileFactor = tileFactor === minTileFactor ? minTileFactor : tileFactor - 1;
+                }
+                for (var i = 0; i < images.length; i++) {
+                    images[i].parentNode.style.display = "inline-block";
+                    images[i].parentNode.style.width = "calc(100% / " + tileFactor + ")";
+                    images[i].style.width = "100%";
+                    images[i].style.height = "auto";
+                }
+                isTiled = true;
+            }
+
+            var showAllImageLabels = function() {
+                for (var i = 0; i < images.length; i++) {
+                    var imageholder = images[i].parentNode;
+                    imageholder.getElementsByTagName("label")[0].style.fontSize = "1vw";
+                }
+            };
+            var hideAllImageLabels = function() {
+                for (var i = 0; i < images.length; i++) {
+                    var imageholder = images[i].parentNode;
+                    imageholder.getElementsByTagName("label")[0].style.fontSize = "0";
+                }
+            };
+
+            return {
+                stretchx: stretchx,
+                stretchy: stretchy,
+                tilesmaller: tilesmaller,
+                tilelarger: tilelarger,
+                get isImagesLabelled() {
+                    return isImagesLabelled;
+                },
+                set isImagesLabelled(value) {
+                    isImagesLabelled = value;
+                    if (isImagesLabelled) {
+                        showAllImageLabels();
+                    }else {
+                        hideAllImageLabels();
                     }
-                };
-            })();
-        </script>
-    </body>
-    </html>
-    ' >> "$indexHtm"
-    echo "$indexHtm"
-done
+                }
+            };
+        })();
+    </script>
+</body>
+</html>' >> "$indexHtm"
+        echo "$indexHtm"
+    done
+fi
+
+# Remove index.htm in each directory
+if [ -n "$CLEAN" ]; then
+    echo "$dirs" | while read -r d; do
+        indexHtm="$d/index.htm"
+        if [ -f "$indexHtm" ]; then
+            rm -f "$indexHtm"
+            echo "$indexHtm"
+        fi
+    done
+fi
