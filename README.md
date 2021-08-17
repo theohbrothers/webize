@@ -27,6 +27,8 @@ wget -qO- https://raw.githubusercontent.com/theohbrothers/webize/master/webize |
 
 At present, gallery is kept as minimalistic as possible. But it might already be better than many \[bloated\] previewing apps out there.
 
+![](doc/assets/gallery-sample-001.png)
+
 ```sh
 # Generate a `index.htm` in every descendent folder of /path/to with image files, and opens them in firefox
 cd /path/to
