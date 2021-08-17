@@ -8,16 +8,16 @@ usage() {
     echo '      gallery             Generate a gallery index.htm'
     echo '      clean               Removes all index.htm'
     echo 'Examples: '
-    echo '      # Generates a gallery index.htm for current directory and all descendent folders which contain images'
+    echo '      # Generate a gallery index.htm for current directory and all descendent folders which contain images'
     echo '      ./webize.sh gallery .'
     echo
-    echo '      # Generates a gallery index.html for /path/to/camera/roll and all descendent folders which contain images'
-    echo '      ./webize.sh gallery /path/to/camera/roll'
+    echo '      # Generate a gallery index.htm for /path/to/camera/roll and all descendent folders which contain images, and open them in firefox'
+    echo '      ./webize.sh gallery /path/to/camera/roll | xargs firefox'
     echo
-    echo '      # Clean all index.htm for current directory and all descendent folders'
-    echo '      ./webize.sh clean /path/to/camera/roll'
+    echo '      # Clean all index.htm for current directory and all descendent folders which contain images'
+    echo '      ./webize.sh clean .'
     echo
-    echo '      # Clean all index.htm for /path/to/camera/roll and all descendent folders'
+    echo '      # Clean all index.htm for /path/to/camera/roll and all descendent folders which contain images'
     echo '      ./webize.sh clean /path/to/camera/roll'
 }
 # Exit if we got no options
