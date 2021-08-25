@@ -96,6 +96,7 @@ if [ -n "$GALLERY" ]; then
 <head>
     <meta charset="utf-8">
     <style>
+        * { box-sizing: border-box; }
         html { width: 100%; height: 100%; background: #000; font-size: 0; }
         body { margin: 0; }
         menu { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; display: block; padding: 1vw; background: #000; opacity: 1; text-align: center; user-select: none; }
@@ -103,7 +104,8 @@ if [ -n "$GALLERY" ]; then
         content:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
         content { display: block; text-align: center; }
         gallery { display: inline-block; width: 100%; text-align: center; vertical-align: middle; }
-        imageholder { position: relative; display: inline-block; margin: 0 auto; width: calc( 100% / 7 ); }
+        imageholder { position: relative; display: inline-block; margin: 0 auto; border: 1px solid transparent; }
+        imageholder.highlight { border: 1px solid #fff; }
         imageholder info { position: absolute; top: 0; left: 0; right: 0; z-index: 0; }
         imageholder info label { display: block; background: #000; color: #fff; font-size: 1vw; font-family: monospace; }
         imageholder img { display: inline-block; margin: 0 auto; width: 100%; height: auto; }
@@ -112,8 +114,8 @@ if [ -n "$GALLERY" ]; then
 <body>
     <menu>
         <fullscreen>💻</fullscreen>
-        <stretchx>↕️</stretchx>
-        <stretchy>↔️</stretchy>
+        <stretchx>↔️</stretchx>
+        <stretchy>↕️</stretchy>
         <tilesmaller>🐜</tilesmaller>
         <tilelarger>🦕</tilelarger>
         <imagelabeller>🏷</imagelabeller>
@@ -158,16 +160,16 @@ if [ -n "$GALLERY" ]; then
                 document.documentElement.requestFullscreen();
             });
             rootElement.getElementsByTagName("stretchx")[0].addEventListener("click", function(e) {
-                gallery.stretchx();
+                gallery.mode = "stretchx";
             });
             rootElement.getElementsByTagName("stretchy")[0].addEventListener("click", function(e) {
-                gallery.stretchy();
+                gallery.mode = "stretchy";
             });
             rootElement.getElementsByTagName("tilesmaller")[0].addEventListener("click", function(e) {
-                gallery.tilesmaller();
+                gallery.mode = "tilesmaller";
             });
             rootElement.getElementsByTagName("tilelarger")[0].addEventListener("click", function(e) {
-                gallery.tilelarger();
+                gallery.mode = "tilelarger";
             });
             rootElement.getElementsByTagName("imagelabeller")[0].addEventListener("click", function(e) {
                 var imagelabeller = document.getElementsByTagName("imagelabeller")[0];
@@ -205,14 +207,211 @@ if [ -n "$GALLERY" ]; then
             var rootElement = document.getElementsByTagName("gallery")[0];
 
             // Defaults
+            var mode = "tilesmaller";
             var tileFactor = 7;
             const minTileFactor = 2;
             const maxTileFactor = 10;
-            var isTiled = true;
             var isImagesLabelled = true;
 
             var images = rootElement.getElementsByTagName("img");
             var activeImageIndex = 0;
+
+            var stretchx = function() {
+                setActiveImageIndex(activeImageIndex);
+                for (var i = 0; i < images.length; i++) {
+                    images[i].parentNode.style.display = "inline-block";
+                    images[i].parentNode.style.width = "100%";
+                    images[i].style.width = "100%";
+                    images[i].style.height = "auto";
+                }
+                setActiveImage
+            };
+
+            var stretchy = function() {
+                setActiveImageIndex(activeImageIndex);
+                for (var i = 0; i < images.length; i++) {
+                    images[i].parentNode.style.display = "inline-block";
+                    images[i].parentNode.style.width = "100%";
+                    images[i].style.width = "auto";
+                    images[i].style.height = "100vh";
+                }
+            };
+
+            var tilesmaller = function() {
+                setActiveImageIndex(activeImageIndex);
+                tileFactor = tileFactor === maxTileFactor ? maxTileFactor : tileFactor + 1;
+                for (var i = 0; i < images.length; i++) {
+                    images[i].parentNode.style.display = "inline-block";
+                    images[i].parentNode.style.width = "calc(100% / " + tileFactor + ")";
+                    images[i].style.width = "100%";
+                    images[i].style.height = "auto";
+                }
+            };
+
+            var tilelarger = function() {
+                setActiveImageIndex(activeImageIndex);
+                tileFactor = tileFactor === minTileFactor ? minTileFactor : tileFactor - 1;
+                for (var i = 0; i < images.length; i++) {
+                    images[i].parentNode.style.display = "inline-block";
+                    images[i].parentNode.style.width = "calc(100% / " + tileFactor + ")";
+                    images[i].style.width = "100%";
+                    images[i].style.height = "auto";
+                }
+            };
+
+            var resetImagesStyles = function() {
+                for (var i = 0; i < images.length; i++) {
+                    var imageholder = images[i].parentNode;
+                    imageholder.className = "";
+                }
+            }
+
+            var showAllImageLabels = function() {
+                for (var i = 0; i < images.length; i++) {
+                    var imageholder = images[i].parentNode;
+                    imageholder.getElementsByTagName("label")[0].style.fontSize = "1vw";
+                }
+            };
+            var hideAllImageLabels = function() {
+                for (var i = 0; i < images.length; i++) {
+                    var imageholder = images[i].parentNode;
+                    imageholder.getElementsByTagName("label")[0].style.fontSize = "0";
+                }
+            };
+
+            var setMode = function(value) {
+                if (value) {
+                    mode = value;
+                }
+                switch (value) {
+                    case "stretchx":
+                        stretchx();
+                        break;
+                    case "stretchy":
+                        stretchy();
+                        break;
+                    case "tilesmaller":
+                        tilesmaller();
+                        break;
+                    case "tilelarger":
+                        tilelarger();
+                        break;
+                    default:
+                        break;
+                }
+            };
+
+            var setActiveImageIndex = function(value) {
+                activeImageIndex = value;
+                var imageholder;
+                for (var i = 0; i < images.length; i++) {
+                    imageholder = images[i].parentNode;
+                    imageholder.className = "";
+                }
+                imageholder = images[activeImageIndex].parentNode;
+                if (mode === "tilesmaller" || mode === "tilelarger") {
+                    imageholder.className = "highlight";
+                }
+                scrollToActiveImage();
+                console.log("[setActiveImageIndex] activeImageIndex: " + activeImageIndex);
+            }
+
+            var setPreviousImageAsActiveImage = function() {
+                if (activeImageIndex <= 0) {
+                    setActiveImageIndex(0);
+                }else {
+                    var imageholder = images[activeImageIndex].parentNode;
+                    var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
+                    idx -= 1;
+                    setActiveImageIndex(idx);
+                }
+            };
+
+            var setNextImageAsActiveImage = function() {
+                if (activeImageIndex >= images.length - 1) {
+                    setActiveImageIndex(images.length - 1);
+                }else {
+                    var imageholder = images[activeImageIndex].parentNode;
+                    var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
+                    idx += 1;
+                    setActiveImageIndex(idx);
+                }
+            };
+
+            var setPreviousRowImageAsActiveImage = function() {
+                var imageholder = images[activeImageIndex].parentNode;
+                var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
+                idx -= tileFactor;
+                if (idx <= 0) {
+                    idx = 0;
+                }
+                setActiveImageIndex(idx);
+            };
+
+            var setNextRowImageAsActiveImage = function() {
+                var imageholder = images[activeImageIndex].parentNode;
+                var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
+                idx += tileFactor;
+                if (idx >= images.length - 1) {
+                    idx = images.length - 1;
+                }
+                setActiveImageIndex(idx);
+            };
+
+            var keyHandler = function(event) {
+                var ele = event.target || event.srcElement;
+                var keyCode = event.keyCode || event.charCode;
+
+                // LEFT arrow key
+                if (keyCode === 37) {
+                    setPreviousImageAsActiveImage();
+                    event.preventDefault();
+                }
+                // RIGHT arrow key
+                if (keyCode === 39) {
+                    setNextImageAsActiveImage();
+                    event.preventDefault();
+                }
+                // UP arrow key
+                if (keyCode === 38) {
+                    if (mode === "tilesmaller" || mode === "tilelarger") {
+                        setPreviousRowImageAsActiveImage();
+                    }else {
+                        setPreviousImageAsActiveImage();
+                    }
+                    event.preventDefault();
+                }
+                // DOWN arrow key
+                if (keyCode === 40) {
+                    if (mode === "tilesmaller" || mode === "tilelarger") {
+                        setNextRowImageAsActiveImage();
+                    }else {
+                        setNextImageAsActiveImage();
+                    }
+                    event.preventDefault();
+                }
+                // ENTER key
+                if (keyCode === 13) {
+                    setMode("stretchy");
+                    event.preventDefault();
+                }
+                // SPACE key
+                if (keyCode == 32) {
+                    setNextImageAsActiveImage();
+                    event.preventDefault();
+                }
+                // BACKSPACE key
+                if (keyCode == 8) {
+                    setPreviousImageAsActiveImage();
+                    event.preventDefault();
+                }
+                // ESC key
+                if (keyCode === 27) {
+                    setMode("tilesmaller");
+                    event.preventDefault();
+                }
+
+            }
 
             var scrollToActiveImage = function() {
                 console.log("Scrolling to active image, index: " + activeImageIndex + ", offsetTop: " + images[activeImageIndex].parentNode.offsetTop);
@@ -221,10 +420,10 @@ if [ -n "$GALLERY" ]; then
 
             // Set element of interest while scrolling
             rootElement.addEventListener("wheel", function(e) {
-                for (var i = images.length - 1; i > 0; i--) {
+                for (var i = images.length - 1; i >= 0; i--) {
                     if (images[i].parentNode.offsetTop < window.scrollY) {
                         console.log("Setting active image: " + i);
-                        activeImageIndex = i;
+                        setActiveImageIndex(i);
                         break;
                     }
                 }
@@ -234,10 +433,11 @@ if [ -n "$GALLERY" ]; then
             var setActiveImageIndexHandler = function(e) {
                 var ele = event.target || event.srcElement;
                 var imageholder = ele.parentNode;
-                activeImageIndex = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
+                var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
+                setActiveImageIndex(idx);
                 console.log("Set active image: " + activeImageIndex);
                 console.log("Selected image: " + activeImageIndex);
-                stretchy();
+                setMode("stretchy");
             };
             // var showActiveImageLabelHandler = function(e) {
             //     if (isImagesLabelled) {
@@ -266,76 +466,14 @@ if [ -n "$GALLERY" ]; then
                 // images[i].addEventListener("mouseleave", hideActiveImageLabelHandler);
             }
 
-            var stretchx = function() {
-                for (var i = 0; i < images.length; i++) {
-                    images[i].parentNode.style.display = "inline-block";
-                    images[i].parentNode.style.width = "100%";
-                    images[i].style.width = "100%";
-                    images[i].style.height = "auto";
-                }
-                isTiled = false;
-                scrollToActiveImage();
-            };
-
-            var stretchy = function() {
-                for (var i = 0; i < images.length; i++) {
-                    images[i].parentNode.style.display = "inline-block";
-                    images[i].parentNode.style.width = "100%";
-                    images[i].style.width = "auto";
-                    images[i].style.height = "100vh";
-                }
-                isTiled = false;
-                scrollToActiveImage();
-            };
-
-            var tilesmaller = function() {
-                if (!isTiled) {
-                    isTiled = true;
-                }else {
-                    tileFactor = tileFactor === maxTileFactor ? maxTileFactor : tileFactor + 1;
-                }
-                for (var i = 0; i < images.length; i++) {
-                    images[i].parentNode.style.display = "inline-block";
-                    images[i].parentNode.style.width = "calc(100% / " + tileFactor + ")";
-                    images[i].style.width = "100%";
-                    images[i].style.height = "auto";
-                }
-                isTiled = true;
-            };
-
-            var tilelarger = function() {
-                if (!isTiled) {
-                    isTiled = true;
-                }else {
-                    tileFactor = tileFactor === minTileFactor ? minTileFactor : tileFactor - 1;
-                }
-                for (var i = 0; i < images.length; i++) {
-                    images[i].parentNode.style.display = "inline-block";
-                    images[i].parentNode.style.width = "calc(100% / " + tileFactor + ")";
-                    images[i].style.width = "100%";
-                    images[i].style.height = "auto";
-                }
-                isTiled = true;
-            }
-
-            var showAllImageLabels = function() {
-                for (var i = 0; i < images.length; i++) {
-                    var imageholder = images[i].parentNode;
-                    imageholder.getElementsByTagName("label")[0].style.fontSize = "1vw";
-                }
-            };
-            var hideAllImageLabels = function() {
-                for (var i = 0; i < images.length; i++) {
-                    var imageholder = images[i].parentNode;
-                    imageholder.getElementsByTagName("label")[0].style.fontSize = "0";
-                }
-            };
-
+            setActiveImageIndex(0);
             return {
-                stretchx: stretchx,
-                stretchy: stretchy,
-                tilesmaller: tilesmaller,
-                tilelarger: tilelarger,
+                get mode() {
+                    return mode;
+                },
+                set mode(value) {
+                    setMode(value);
+                },
                 get isImagesLabelled() {
                     return isImagesLabelled;
                 },
@@ -346,9 +484,16 @@ if [ -n "$GALLERY" ]; then
                     }else {
                         hideAllImageLabels();
                     }
-                }
+                },
+                keyHandler: keyHandler
             };
         })();
+
+        // App init
+        gallery.mode = "tilesmaller";
+        window.addEventListener("keydown", function (event) {
+            gallery.keyHandler(event);
+        });
     </script>
 </body>
 </html>' >> "$indexHtm"
