@@ -217,28 +217,26 @@ if [ -n "$GALLERY" ]; then
             var activeImageIndex = 0;
 
             var stretchx = function() {
-                setActiveImageIndex(activeImageIndex);
                 for (var i = 0; i < images.length; i++) {
                     images[i].parentNode.style.display = "inline-block";
                     images[i].parentNode.style.width = "100%";
                     images[i].style.width = "100%";
                     images[i].style.height = "auto";
                 }
-                setActiveImage
+                setActiveImageIndex(activeImageIndex);
             };
 
             var stretchy = function() {
-                setActiveImageIndex(activeImageIndex);
                 for (var i = 0; i < images.length; i++) {
                     images[i].parentNode.style.display = "inline-block";
                     images[i].parentNode.style.width = "100%";
                     images[i].style.width = "auto";
                     images[i].style.height = "100vh";
                 }
+                setActiveImageIndex(activeImageIndex);
             };
 
             var tilesmaller = function() {
-                setActiveImageIndex(activeImageIndex);
                 tileFactor = tileFactor === maxTileFactor ? maxTileFactor : tileFactor + 1;
                 for (var i = 0; i < images.length; i++) {
                     images[i].parentNode.style.display = "inline-block";
@@ -246,10 +244,10 @@ if [ -n "$GALLERY" ]; then
                     images[i].style.width = "100%";
                     images[i].style.height = "auto";
                 }
+                setActiveImageIndex(activeImageIndex);
             };
 
             var tilelarger = function() {
-                setActiveImageIndex(activeImageIndex);
                 tileFactor = tileFactor === minTileFactor ? minTileFactor : tileFactor - 1;
                 for (var i = 0; i < images.length; i++) {
                     images[i].parentNode.style.display = "inline-block";
@@ -257,6 +255,7 @@ if [ -n "$GALLERY" ]; then
                     images[i].style.width = "100%";
                     images[i].style.height = "auto";
                 }
+                setActiveImageIndex(activeImageIndex);
             };
 
             var resetImagesStyles = function() {
