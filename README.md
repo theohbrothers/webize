@@ -27,7 +27,7 @@ wget -qO- https://raw.githubusercontent.com/theohbrothers/webize/master/webize |
 
 At present, gallery is kept as minimalistic as possible. But it might already be better than many \[bloated\] previewing apps out there.
 
-![](doc/assets/gallery-sample-001.png)
+![](doc/assets/gallery-sample.png)
 
 ```sh
 # Generate a `index.htm` in every descendent folder of /path/to with image files, and opens them in firefox
@@ -37,3 +37,15 @@ webize gallery . | xargs firefox
 # Cleanup once you are done
 webize clean .
 ```
+
+Keyboard shortcuts:
+
+| Key| Behavior |
+|---|---|
+| LEFT | Previous image
+| RIGHT | Next image
+| UP | Previous image (or previous row in tiled view)
+| DOWN | Next image (or previous row in tiled view)
+| SPACE | Next image
+| BACKSPACE | Previous image
+| ESC | Back to tiled view
