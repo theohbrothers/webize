@@ -113,13 +113,13 @@ if [ -n "$GALLERY" ]; then
 </head>
 <body>
     <menu>
-        <fullscreen>💻</fullscreen>
-        <stretchx>↔️</stretchx>
-        <stretchy>↕️</stretchy>
-        <tilesmaller>🐜</tilesmaller>
-        <tilelarger>🦕</tilelarger>
-        <imagelabeller>🏷</imagelabeller>
-        <pin>📌</pin>
+        <fullscreen title="Full Screen" alt="Full Screen"">💻</fullscreen>
+        <stretchx title="Stretch horizontally" alt="Stretch horizontally">↔️</stretchx>
+        <stretchy title="Stretch vertically" alt="Stretch vertically">↕️</stretchy>
+        <tilesmaller title="Tile smaller" alt="Tile smaller">🐜</tilesmaller>
+        <tilelarger title="Tile larger" alt="Tile larger">🦕</tilelarger>
+        <imagelabeller title="Toggle label" alt="Toggle label">🏷</imagelabeller>
+        <pin title="Toggle pinned menu" alt="Toggle pinned menu">📌</pin>
     </menu>
     <content>
         <gallery>
