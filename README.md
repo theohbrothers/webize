@@ -45,7 +45,7 @@ Keyboard shortcuts:
 | LEFT | Previous image
 | RIGHT | Next image
 | UP | Previous image (or previous row in tiled view)
-| DOWN | Next image (or previous row in tiled view)
-| SPACE | Next image
+| DOWN | Next image (or next row in tiled view)
 | BACKSPACE | Previous image
+| SPACE | Next image
 | ESC | Back to tiled view
