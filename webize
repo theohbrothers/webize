@@ -234,8 +234,8 @@ if [ -n "$GALLERY" ]; then
                 if (keyCode === 80) {
                     togglePinHandler();
                 }
-                console.log(keyCode);
 
+                // console.log(keyCode);
             };
 
             return {
@@ -264,7 +264,7 @@ if [ -n "$GALLERY" ]; then
                     images[i].style.width = "100%";
                     images[i].style.height = "auto";
                 }
-                setActiveImageIndex(activeImageIndex);
+                setActiveImageIndex(activeImageIndex, true);
             };
 
             var stretchy = function() {
@@ -274,7 +274,7 @@ if [ -n "$GALLERY" ]; then
                     images[i].style.width = "auto";
                     images[i].style.height = "100vh";
                 }
-                setActiveImageIndex(activeImageIndex);
+                setActiveImageIndex(activeImageIndex, true);
             };
 
             var tilesmaller = function() {
@@ -285,7 +285,7 @@ if [ -n "$GALLERY" ]; then
                     images[i].style.width = "100%";
                     images[i].style.height = "auto";
                 }
-                setActiveImageIndex(activeImageIndex);
+                setActiveImageIndex(activeImageIndex, true);
             };
 
             var tilelarger = function() {
@@ -296,7 +296,7 @@ if [ -n "$GALLERY" ]; then
                     images[i].style.width = "100%";
                     images[i].style.height = "auto";
                 }
-                setActiveImageIndex(activeImageIndex);
+                setActiveImageIndex(activeImageIndex, true);
             };
 
             var resetImagesStyles = function() {
@@ -341,7 +341,7 @@ if [ -n "$GALLERY" ]; then
                 }
             };
 
-            var setActiveImageIndex = function(value) {
+            var setActiveImageIndex = function(value, scroll) {
                 activeImageIndex = value;
                 var imageholder;
                 for (var i = 0; i < images.length; i++) {
@@ -352,29 +352,31 @@ if [ -n "$GALLERY" ]; then
                 if (mode === "tilesmaller" || mode === "tilelarger") {
                     imageholder.className = "highlight";
                 }
-                scrollToActiveImage();
+                if (scroll) {
+                    scrollToActiveImage();
+                }
                 console.log("[setActiveImageIndex] activeImageIndex: " + activeImageIndex);
             }
 
             var setPreviousImageAsActiveImage = function() {
                 if (activeImageIndex <= 0) {
-                    setActiveImageIndex(0);
+                    setActiveImageIndex(0, true);
                 }else {
                     var imageholder = images[activeImageIndex].parentNode;
                     var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
                     idx -= 1;
-                    setActiveImageIndex(idx);
+                    setActiveImageIndex(idx, true);
                 }
             };
 
             var setNextImageAsActiveImage = function() {
                 if (activeImageIndex >= images.length - 1) {
-                    setActiveImageIndex(images.length - 1);
+                    setActiveImageIndex(images.length - 1, true);
                 }else {
                     var imageholder = images[activeImageIndex].parentNode;
                     var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
                     idx += 1;
-                    setActiveImageIndex(idx);
+                    setActiveImageIndex(idx, true);
                 }
             };
 
@@ -385,7 +387,7 @@ if [ -n "$GALLERY" ]; then
                 if (idx <= 0) {
                     idx = 0;
                 }
-                setActiveImageIndex(idx);
+                setActiveImageIndex(idx, true);
             };
 
             var setNextRowImageAsActiveImage = function() {
@@ -395,7 +397,7 @@ if [ -n "$GALLERY" ]; then
                 if (idx >= images.length - 1) {
                     idx = images.length - 1;
                 }
-                setActiveImageIndex(idx);
+                setActiveImageIndex(idx, true);
             };
 
             var keyHandler = function(event) {
@@ -471,7 +473,8 @@ if [ -n "$GALLERY" ]; then
                     setMode("tilelarger");
                     event.preventDefault();
                 }
-                console.log(keyCode);
+
+                // console.log(keyCode);
             };
 
             var scrollToActiveImage = function() {
@@ -491,13 +494,15 @@ if [ -n "$GALLERY" ]; then
             });
 
             // Set as element of interest while clicking or focusing
-            var setActiveImageIndexHandler = function(e) {
+            var clickOrFocusHandler = function(e) {
+                if (mode === "stretchx" || mode === "stretchy" ) {
+                    // Tap on image should toggle the menu
+                    menu.togglePinHandler();
+                }
                 var ele = event.target || event.srcElement;
                 var imageholder = ele.parentNode;
                 var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
                 setActiveImageIndex(idx);
-                console.log("Set active image: " + activeImageIndex);
-                console.log("Selected image: " + activeImageIndex);
                 setMode("stretchy");
             };
             // var showActiveImageLabelHandler = function(e) {
@@ -515,20 +520,8 @@ if [ -n "$GALLERY" ]; then
             //     }
             // };
             for (var i = 0; i < images.length; i++) {
-                images[i].addEventListener("click", function(event) {
-                    if (mode === "stretchx" || mode === "stretchy" ) {
-                        // Tap on image should toggle the menu
-                        menu.togglePinHandler();
-                    }
-                    setActiveImageIndexHandler(event);
-                });
-                images[i].addEventListener("focus", function(event) {
-                    if (mode === "stretchx" || mode === "stretchy" ) {
-                        // Tap on image should toggle the menu
-                        menu.togglePinHandler();
-                    }
-                    setActiveImageIndexHandler(event);
-                });
+                images[i].addEventListener("click", clickOrFocusHandler);
+                images[i].addEventListener("focus", clickOrFocusHandler);
 
                 // images[i].addEventListener("click", showActiveImageLabelHandler);
                 // images[i].addEventListener("focus", showActiveImageLabelHandler);
@@ -539,7 +532,6 @@ if [ -n "$GALLERY" ]; then
                 // images[i].addEventListener("mouseleave", hideActiveImageLabelHandler);
             }
 
-            setActiveImageIndex(0);
             return {
                 get mode() {
                     return mode;
