@@ -484,11 +484,13 @@ if [ -n "$GALLERY" ]; then
 
             // Set element of interest while scrolling
             rootElement.addEventListener("wheel", function(e) {
-                for (var i = images.length - 1; i >= 0; i--) {
-                    if (images[i].parentNode.offsetTop < window.scrollY) {
-                        console.log("Setting active image: " + i);
-                        setActiveImageIndex(i);
-                        break;
+                if (mode === "stretchx" || mode === "stretchy" ) {
+                    for (var i = images.length - 1; i >= 0; i--) {
+                        if (images[i].parentNode.offsetTop < window.scrollY) {
+                            console.log("Setting active image: " + i);
+                            setActiveImageIndex(i);
+                            break;
+                        }
                     }
                 }
             });
