@@ -239,7 +239,8 @@ if [ -n "$GALLERY" ]; then
             };
 
             return {
-                keyHandler: keyHandler
+                keyHandler: keyHandler,
+                togglePinHandler: togglePinHandler
             };
         })();
 
@@ -514,8 +515,20 @@ if [ -n "$GALLERY" ]; then
             //     }
             // };
             for (var i = 0; i < images.length; i++) {
-                images[i].addEventListener("click", setActiveImageIndexHandler);
-                images[i].addEventListener("focus", setActiveImageIndexHandler);
+                images[i].addEventListener("click", function(event) {
+                    if (mode === "stretchx" || mode === "stretchy" ) {
+                        // Tap on image should toggle the menu
+                        menu.togglePinHandler();
+                    }
+                    setActiveImageIndexHandler(event);
+                });
+                images[i].addEventListener("focus", function(event) {
+                    if (mode === "stretchx" || mode === "stretchy" ) {
+                        // Tap on image should toggle the menu
+                        menu.togglePinHandler();
+                    }
+                    setActiveImageIndexHandler(event);
+                });
 
                 // images[i].addEventListener("click", showActiveImageLabelHandler);
                 // images[i].addEventListener("focus", showActiveImageLabelHandler);
