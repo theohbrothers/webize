@@ -44,8 +44,16 @@ Keyboard shortcuts:
 |---|---|
 | LEFT | Previous image
 | RIGHT | Next image
-| UP | Previous image (or previous row in tiled view)
-| DOWN | Next image (or previous row in tiled view)
+| UP | Previous image (of previous row in tiled view)
+| DOWN | Next image (of next row in tiled view)
+| ENTER | Expand image
+| BACKSPACE | Back to tiled view
 | SPACE | Next image
-| BACKSPACE | Previous image
-| ESC | Back to tiled view
+| ESC | Escape from full screen, or back to tile mode
+| `F` | Mode: Full screen
+| `X` | Mode: Stretch horizontal
+| `Y` | Mode: Stretch vertical
+| `-` | Mode: Tile smaller
+| `=` | Mode: Tile larger
+| `L` | Mode: Show / Hide label
+| `P` | Menu: Pin / Unpin menu

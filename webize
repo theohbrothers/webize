@@ -99,27 +99,27 @@ if [ -n "$GALLERY" ]; then
         * { box-sizing: border-box; }
         html { width: 100%; height: 100%; background: #000; font-size: 0; }
         body { margin: 0; }
-        menu { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; display: block; padding: 1vw; background: #000; opacity: 1; text-align: center; user-select: none; }
-        menu fullscreen, menu stretchx, menu stretchy, menu tilesmaller, menu tilelarger, menu imagelabeller, menu pin { display: inline-block; margin-right: 2vw; /*width: calc( 4vw + 2px ); height: calc( 4vw + 2px ); border: 1px solid #fff; border-radius: 50%; */ padding: 1vw; font-size: 2vw; color: #fff; cursor: pointer; }
+        menu { position: fixed; top: calc(100vh - 2vw - 4vw); bottom: 0; left: 0; right: 0; z-index: 1000; display: block; padding: 1vw; background: #000; opacity: 1; text-align: center; user-select: none; }
+        menu fullscreen, menu stretchx, menu stretchy, menu tilesmaller, menu tilelarger, menu imagelabeller, menu pin { display: inline-block; margin-right: 2vw; padding: 1vw; font-size: 2vw; line-height: 2vw; color: #fff; cursor: pointer; }
         content:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
         content { display: block; text-align: center; }
         gallery { display: inline-block; width: 100%; text-align: center; vertical-align: middle; }
         imageholder { position: relative; display: inline-block; margin: 0 auto; border: 1px solid transparent; }
         imageholder.highlight { border: 1px solid #fff; }
         imageholder info { position: absolute; top: 0; left: 0; right: 0; z-index: 0; }
-        imageholder info label { display: block; background: #000; color: #fff; font-size: 1vw; font-family: monospace; }
+        imageholder info label { display: block; background: #000; color: #fff; font-size: 1vw; line-height: 1vw; font-family: monospace; }
         imageholder img { display: inline-block; margin: 0 auto; width: 100%; height: auto; }
     </style>
 </head>
 <body>
     <menu>
-        <fullscreen title="Full Screen" alt="Full Screen"">💻</fullscreen>
-        <stretchx title="Stretch horizontally" alt="Stretch horizontally">↔️</stretchx>
-        <stretchy title="Stretch vertically" alt="Stretch vertically">↕️</stretchy>
-        <tilesmaller title="Tile smaller" alt="Tile smaller">🐜</tilesmaller>
-        <tilelarger title="Tile larger" alt="Tile larger">🦕</tilelarger>
-        <imagelabeller title="Toggle label" alt="Toggle label">🏷</imagelabeller>
-        <pin title="Toggle pinned menu" alt="Toggle pinned menu">📌</pin>
+        <fullscreen title="Full Screen (F)" alt="Full Screen (F)">💻</fullscreen>
+        <stretchx title="Stretch horizontal (X)" alt="Stretch horizontal (X)">↔️</stretchx>
+        <stretchy title="Stretch vertical (Y)" alt="Stretch vertical (Y)">↕️</stretchy>
+        <tilesmaller title="Tile smaller (-)" alt="Tile smaller (-)">🐜</tilesmaller>
+        <tilelarger title="Tile larger (+)" alt="Tile larger (=)">🦕</tilelarger>
+        <imagelabeller title="Show / Hide label (L)" alt="Show / Hide label (L)">🏷</imagelabeller>
+        <pin title="Pin / Unpin menu (P)" alt="Pin / Unpin menu (P)">📌</pin>
     </menu>
     <content>
         <gallery>
@@ -141,24 +141,28 @@ if [ -n "$GALLERY" ]; then
         var menu = (function() {
             var rootElement = document.getElementsByTagName("menu")[0];
             var isPinned = true;
+            var isMouseEntered = false;
 
             rootElement.addEventListener("mouseenter", function(e) {
-                if (isPinned) {
-                    rootElement.style.opacity = "1";
-                }else {
-                    rootElement.style.opacity = "1";
-                }
+                isMouseEntered = true;
+                rootElement.style.opacity = "1";
+                rootElement.style.paddingTop = "";
             });
             rootElement.addEventListener("mouseleave", function(e) {
-                if (isPinned) {
-                    rootElement.style.opacity = "1";
-                }else {
+                isMouseEntered = false;
+                if (!isPinned) {
                     rootElement.style.opacity = "0";
+                    rootElement.style.paddingTop = "100vh"; // Push the menu items out of viewport
                 }
             });
-            rootElement.getElementsByTagName("fullscreen")[0].addEventListener("click", function(e) {
+
+            var toggleFullscreenHandler = function() {
                 document.documentElement.requestFullscreen();
+            };
+            rootElement.getElementsByTagName("fullscreen")[0].addEventListener("click", function(e) {
+                toggleFullscreenHandler();
             });
+
             rootElement.getElementsByTagName("stretchx")[0].addEventListener("click", function(e) {
                 gallery.mode = "stretchx";
             });
@@ -171,7 +175,8 @@ if [ -n "$GALLERY" ]; then
             rootElement.getElementsByTagName("tilelarger")[0].addEventListener("click", function(e) {
                 gallery.mode = "tilelarger";
             });
-            rootElement.getElementsByTagName("imagelabeller")[0].addEventListener("click", function(e) {
+
+            var toggleLabelHandler = function() {
                 var imagelabeller = document.getElementsByTagName("imagelabeller")[0];
                 if (gallery.isImagesLabelled) {
                     isPinned = true;
@@ -184,23 +189,58 @@ if [ -n "$GALLERY" ]; then
                     rootElement.style.opacity = "";
                     imagelabeller.style.opacity = "1.0";
                 }
+            };
+            rootElement.getElementsByTagName("imagelabeller")[0].addEventListener("click", function(e) {
+                toggleLabelHandler();
             });
-            rootElement.getElementsByTagName("pin")[0].addEventListener("click", function(e) {
+
+            var togglePinHandler = function() {
                 var pin = document.getElementsByTagName("pin")[0];
                 if (isPinned) {
                     isPinned = false;
-                    rootElement.style.opacity = "";
+                    if (isMouseEntered) {
+                        rootElement.style.opacity = "";
+                        rootElement.style.paddingTop = "";
+                    }else {
+                        rootElement.style.opacity = "0";
+                        rootElement.style.paddingTop = "100vh"; // Push the menu items out of viewport
+                    }
                     pin.style.opacity = "0.5";
                 }else {
                     isPinned = true;
-                    rootElement.style.opacity = "";
-                    pin.style.opacity = "";
+                    rootElement.style.opacity = "1.0";
+                    rootElement.style.paddingTop = "";
+                    pin.style.opacity = "1.0";
                 }
+            };
+            rootElement.getElementsByTagName("pin")[0].addEventListener("click", function(e) {
+                togglePinHandler();
             });
 
-            return {
 
-            }
+            var keyHandler = function(event) {
+                var ele = event.target || event.srcElement;
+                var keyCode = event.keyCode || event.charCode;
+
+                // f key
+                if (keyCode === 70) {
+                    toggleFullscreenHandler();
+                }
+                // l key
+                if (keyCode === 76) {
+                    toggleLabelHandler();
+                }
+                // p key
+                if (keyCode === 80) {
+                    togglePinHandler();
+                }
+                console.log(keyCode);
+
+            };
+
+            return {
+                keyHandler: keyHandler
+            };
         })();
 
         var gallery = (function() {
@@ -394,23 +434,44 @@ if [ -n "$GALLERY" ]; then
                     setMode("stretchy");
                     event.preventDefault();
                 }
+                // BACKSPACE key
+                if (keyCode == 8) {
+                    setMode("tilesmaller");
+                    event.preventDefault();
+                }
                 // SPACE key
                 if (keyCode == 32) {
                     setNextImageAsActiveImage();
                     event.preventDefault();
                 }
-                // BACKSPACE key
-                if (keyCode == 8) {
-                    setPreviousImageAsActiveImage();
-                    event.preventDefault();
-                }
-                // ESC key
+                // ESC key (if in full screen, escapes full screen first, goes back to tiled view, and tiles smaller)
                 if (keyCode === 27) {
                     setMode("tilesmaller");
                     event.preventDefault();
                 }
 
-            }
+                // x key
+                if (keyCode === 88) {
+                    setMode("stretchx");
+                    event.preventDefault();
+                }
+                // y key
+                if (keyCode === 89) {
+                    setMode("stretchy");
+                    event.preventDefault();
+                }
+                // - key
+                if (keyCode === 173) {
+                    setMode("tilesmaller");
+                    event.preventDefault();
+                }
+                // = key
+                if (keyCode === 61) {
+                    setMode("tilelarger");
+                    event.preventDefault();
+                }
+                console.log(keyCode);
+            };
 
             var scrollToActiveImage = function() {
                 console.log("Scrolling to active image, index: " + activeImageIndex + ", offsetTop: " + images[activeImageIndex].parentNode.offsetTop);
@@ -491,6 +552,7 @@ if [ -n "$GALLERY" ]; then
         // App init
         gallery.mode = "tilesmaller";
         window.addEventListener("keydown", function (event) {
+            menu.keyHandler(event);
             gallery.keyHandler(event);
         });
     </script>
