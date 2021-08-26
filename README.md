@@ -18,7 +18,9 @@ The goal of `webize` is to help the user move another step away from proprietary
 ## Install
 
 ```sh
-wget -qO- https://raw.githubusercontent.com/theohbrothers/webize/master/webize | sudo tee /usr/local/bin/webize && sudo chmod +x /usr/local/bin/webize
+sudo wget -q https://raw.githubusercontent.com/theohbrothers/webize/master/webize -O /usr/local/bin/webize && sudo chmod +x /usr/local/bin/webize
+# or
+sudo curl -sL https://raw.githubusercontent.com/theohbrothers/webize/master/webize -o /usr/local/bin/webize && sudo chmod +x /usr/local/bin/webize
 ```
 
 ## Usage
