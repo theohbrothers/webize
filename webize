@@ -516,7 +516,8 @@ cat - >> "$indexHtm" <<'EOF'
                 }
             };
 
-            var setMode = function(value, preserve) {
+            var setMode = function(value) {
+                var modePrev = mode;
                 if (value) {
                     mode = value;
                 }
@@ -528,10 +529,18 @@ cat - >> "$indexHtm" <<'EOF'
                         stretchy();
                         break;
                     case "tilesmaller":
-                        tilesmaller(preserve);
+                        if (modePrev === "tilesmaller" || modePrev === "tilelarger") {
+                            tilesmaller();
+                        }else {
+                            tilesmaller(true);
+                        }
                         break;
                     case "tilelarger":
-                        tilelarger(preserve);
+                        if (modePrev === "tilesmaller" || modePrev === "tilelarger") {
+                            tilesmaller();
+                        }else {
+                            tilesmaller(true);
+                        }
                         break;
                     default:
                         break;
@@ -617,7 +626,7 @@ cat - >> "$indexHtm" <<'EOF'
 
             var sort = function(sortMode) {
                 createImageComponents(sortMode);
-                setMode(mode, true);
+                setMode(mode);
             }
 
             var keyHandler = function(event) {
