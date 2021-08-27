@@ -59,3 +59,4 @@ Keyboard shortcuts:
 | `=` | Mode: Tile larger
 | `L` | Mode: Show / Hide label
 | `P` | Menu: Pin / Unpin menu
+| `S` | Menu: Toggle sort mode
