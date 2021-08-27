@@ -135,7 +135,7 @@ if [ -n "$GALLERY" ]; then
         <tilelarger title="Tile larger (+)" alt="Tile larger (=)">🦕</tilelarger>
         <imagelabeller title="Show / Hide label (L)" alt="Show / Hide label (L)">🏷</imagelabeller>
         <pin title="Pin / Unpin menu (P)" alt="Pin / Unpin menu (P)">📌</pin>
-        <sort title="Change sort order" alt="Change sort order"></sort><!-- innerHTML will be injected on DOMContentLoaded -->
+        <sort title="Toggle sort mode" alt="Toggle sort mode"></sort><!-- innerHTML will be injected on DOMContentLoaded -->
     </menu>
     <content>
         <gallery></gallery>
@@ -340,6 +340,10 @@ cat - >> "$indexHtm" <<'EOF'
                 if (keyCode === 80) {
                     togglePinHandler();
                 }
+                // s key
+                if (keyCode === 83) {
+                    toggleSortMode();
+                }
 
                 // console.log(keyCode);
             };
@@ -523,7 +527,7 @@ cat - >> "$indexHtm" <<'EOF'
                 }
             };
 
-            var setMode = function(value) {
+            var setMode = function(value, preserve) {
                 var modePrev = mode;
                 if (value) {
                     mode = value;
@@ -537,16 +541,16 @@ cat - >> "$indexHtm" <<'EOF'
                         break;
                     case "tilesmaller":
                         if (modePrev === "tilesmaller" || modePrev === "tilelarger") {
-                            tilesmaller();
+                            tilesmaller(preserve);
                         }else {
                             tilesmaller(true);
                         }
                         break;
                     case "tilelarger":
                         if (modePrev === "tilesmaller" || modePrev === "tilelarger") {
-                            tilelarger();
+                            tilesmaller(preserve);
                         }else {
-                            tilelarger(true);
+                            tilesmaller(true);
                         }
                         break;
                     default:
@@ -633,7 +637,7 @@ cat - >> "$indexHtm" <<'EOF'
 
             var sort = function(sortMode) {
                 createImageComponents(sortMode);
-                setMode(mode);
+                setMode(mode, true);
             }
 
             var keyHandler = function(event) {
