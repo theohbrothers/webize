@@ -91,10 +91,17 @@ if [ -n "$GALLERY" ]; then
         indexHtm="$d/index.htm"
         imagesCsv=$(
             # Get only files, ignore the first line of ls -al, then parse file attributes into a single CSV. E.g. -rwxr-xr-x 1 packer packer 22681 2021-08-27T07:36:45+0000 webize -> webize,22681,2021-08-27T07:36:45+0000
-            ls -al --time-style='+%Y-%m-%dT%H:%M:%S%z' -p "$d" | grep -v '/' | grep -E '\.png|\.jpg|\.webp|\.svg' | while read -r l; do
+            if echo "$OSTYPE" | grep -qE 'darwin'; then
+                cd "$d"
+                files=$( stat -l -t '%Y-%m-%dT%H:%M:%S%z' * )
+            else
+                files=$( ls -al --time-style='+%Y-%m-%dT%H:%M:%S%z' -p "$d" )
+            fi
+
+            echo "$files" | grep -v '/' | grep -E '\.png|\.jpg|\.webp|\.svg' | while read -r l; do
                 size=$( echo "$l" | awk '{print $5}' )
                 dateiso=$( echo "$l" | awk '{print $6}' )
-                filename=$( echo "$l" | awk '{print $1=$2=$3=$4=$5=$6=""; print $0}' | awk NF | sed 's/^\s*//g' )
+                filename=$( echo "$l" | awk '{print $1=$2=$3=$4=$5=$6=""; print $0}' | awk NF | sed 's/^[ ]*//g' )
                 extension=$( echo "$filename" | sed 's/.*\(\.[^.]*\)$/\1/' )
                 echo "$filename,$size,$dateiso,$extension"
             done
@@ -128,7 +135,7 @@ if [ -n "$GALLERY" ]; then
         <tilelarger title="Tile larger (+)" alt="Tile larger (=)">🦕</tilelarger>
         <imagelabeller title="Show / Hide label (L)" alt="Show / Hide label (L)">🏷</imagelabeller>
         <pin title="Pin / Unpin menu (P)" alt="Pin / Unpin menu (P)">📌</pin>
-        <sort title="Change sort order" alt="Change sort order"></pin><!-- innerHTML will be injected on DOMContentLoaded -->
+        <sort title="Change sort order" alt="Change sort order"></sort><!-- innerHTML will be injected on DOMContentLoaded -->
     </menu>
     <content>
         <gallery></gallery>
