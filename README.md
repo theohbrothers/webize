@@ -58,5 +58,5 @@ Keyboard shortcuts:
 | `-` | Mode: Tile smaller
 | `=` | Mode: Tile larger
 | `L` | Mode: Show / Hide label
+| `S` | Mode: Toggle sort mode
 | `P` | Menu: Pin / Unpin menu
-| `S` | Menu: Toggle sort mode
