@@ -89,9 +89,17 @@ fi
 if [ -n "$GALLERY" ]; then
     echo "$dirs" | while read -r d; do
         indexHtm="$d/index.htm"
-        images=$( ls -p "$d" | grep -v '/' | grep -E '\.png|\.jpg|\.webp|\.svg' )
-
-        echo '
+        imagesCsv=$(
+            # Get only files, ignore the first line of ls -al, then parse file attributes into a single CSV. E.g. -rwxr-xr-x 1 packer packer 22681 2021-08-27T07:36:45+0000 webize -> webize,22681,2021-08-27T07:36:45+0000
+            ls -al --time-style='+%Y-%m-%dT%H:%M:%S%z' -p "$d" | grep -v '/' | grep -E '\.png|\.jpg|\.webp|\.svg' | while read -r l; do
+                size=$( echo "$l" | awk '{print $5}' )
+                dateiso=$( echo "$l" | awk '{print $6}' )
+                filename=$( echo "$l" | awk '{print $1=$2=$3=$4=$5=$6=""; print $0}' | awk NF | sed 's/^\s*//g' )
+                extension=$( echo "$filename" | sed 's/.*\(\.[^.]*\)$/\1/' )
+                echo "$filename,$size,$dateiso,$extension"
+            done
+        )
+        cat - > "$indexHtm" <<'EOF'
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -100,10 +108,10 @@ if [ -n "$GALLERY" ]; then
         html { width: 100%; height: 100%; background: #000; font-size: 0; }
         body { margin: 0; }
         menu { position: fixed; top: calc(100vh - 2vw - 4vw); bottom: 0; left: 0; right: 0; z-index: 1000; display: block; padding: 1vw; background: #000; opacity: 1; text-align: center; user-select: none; }
-        menu fullscreen, menu stretchx, menu stretchy, menu tilesmaller, menu tilelarger, menu imagelabeller, menu pin { display: inline-block; margin-right: 2vw; padding: 1vw; font-size: 2vw; line-height: 2vw; color: #fff; cursor: pointer; }
+        menu fullscreen, menu stretchx, menu stretchy, menu tilesmaller, menu tilelarger, menu imagelabeller, menu pin, menu sort { display: inline-block; margin-right: 2vw; padding: 1vw; font-size: 2vw; line-height: 2vw; color: #fff; cursor: pointer; }
         content:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
         content { display: block; text-align: center; }
-        gallery { display: inline-block; width: 100%; text-align: center; vertical-align: middle; }
+        gallery { display: inline-block; width: 100%; text-align: center; vertical-align: middle; opacity: 0; }
         imageholder { position: relative; display: inline-block; margin: 0 auto; border: 1px solid transparent; }
         imageholder.highlight { border: 1px solid #fff; }
         imageholder info { position: absolute; top: 0; left: 0; right: 0; z-index: 0; }
@@ -120,28 +128,113 @@ if [ -n "$GALLERY" ]; then
         <tilelarger title="Tile larger (+)" alt="Tile larger (=)">🦕</tilelarger>
         <imagelabeller title="Show / Hide label (L)" alt="Show / Hide label (L)">🏷</imagelabeller>
         <pin title="Pin / Unpin menu (P)" alt="Pin / Unpin menu (P)">📌</pin>
+        <sort title="Change sort order" alt="Change sort order"></pin><!-- innerHTML will be injected on DOMContentLoaded -->
     </menu>
     <content>
-        <gallery>
-    ' > "$d/index.htm"
-        echo "$images" | while read -r i; do
-            echo "
-                <imageholder>
-                    <info>
-                        <label>$i</label>
-                    </info>
-                    <img src=\"$i\" />
-                </imageholder>
-            " >> "$indexHtm"
-        done
-        echo '
-        </gallery>
+        <gallery></gallery>
     </content>
     <script>
+        // Images
+        const imagesCsv = `
+EOF
+    echo "$imagesCsv" >> "$indexHtm"
+cat - >> "$indexHtm" <<'EOF'
+`;
+        // Parse into image objects
+        const imageObjects = (function(imagesCsv) {
+            var imageObjects = [];
+
+            var split = imagesCsv.split(/\n/).filter(function (v) { return v !== ''; });
+            for (var i = 0; i < split.length; i++) {
+                var fileAttr = split[i].split(/,/);
+                imageObjects.push({
+                    filename: fileAttr[0],
+                    size: fileAttr[1],
+                    dateiso: fileAttr[2],
+                    extension: fileAttr[3],
+                 });
+            }
+
+            return imageObjects;
+        }(imagesCsv));
+
+        var Helpers = (function () {
+            return {
+                htmlEntities: function htmlEntities(str) {
+                    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, '&#39;').replace(/"/g, '&#34;').replace(/ /g, '&nbsp;').replace(/\r?\n/g, '<br />');
+                },
+            };
+        })();
+
         var menu = (function() {
             var rootElement = document.getElementsByTagName("menu")[0];
             var isPinned = true;
             var isMouseEntered = false;
+            var sortModeIndex = 0;
+            var sortModes = [
+                {
+                    "label": "🔤🔼",
+                    "keys": [
+                        "filename"
+                    ],
+                    "order": "asc",
+                },
+                {
+                    "label": "🔤🔽",
+                    "keys": [
+                        "filename"
+                    ],
+                    "order": "desc",
+                },
+                {
+                    "label": "📆🔼",
+                    "keys": [
+                        "dateiso"
+                    ],
+                    "order": "asc",
+                },
+                {
+                    "label": "📆🔽",
+                    "keys": [
+                        "dateiso"
+                    ],
+                    "order": "desc",
+                },
+                {
+                    "label": "🍱🔼",
+                    "keys": [
+                        "extension"
+                    ],
+                    "order": "asc",
+                },
+                {
+                    "label": "🍱🔽",
+                    "keys": [
+                        "extension"
+                    ],
+                    "order": "desc",
+                },
+                {
+                    "label": "🔢🔼",
+                    "keys": [
+                        "size"
+                    ],
+                    "order": "asc",
+                },
+                {
+                    "label": "🔢🔽",
+                    "keys": [
+                        "size"
+                    ],
+                    "order": "desc",
+                }
+            ];
+
+            // Init
+            document.addEventListener("DOMContentLoaded", function(event) {
+                var sort = document.getElementsByTagName("sort")[0];
+                sort.innerHTML = sortModes[sortModeIndex].label;
+            });
 
             rootElement.addEventListener("mouseenter", function(e) {
                 isMouseEntered = true;
@@ -213,6 +306,16 @@ if [ -n "$GALLERY" ]; then
                 togglePinHandler();
             });
 
+            var toggleSortMode = function() {
+                var sort = document.getElementsByTagName("sort")[0];
+
+                sortModeIndex = sortModeIndex === sortModes.length - 1 ? 0 : sortModeIndex + 1;
+                sort.innerHTML = sortModes[sortModeIndex].label;
+                gallery.sort(sortModes[sortModeIndex]);
+            };
+            rootElement.getElementsByTagName("sort")[0].addEventListener("click", function(e) {
+                toggleSortMode();
+            });
 
             var keyHandler = function(event) {
                 var ele = event.target || event.srcElement;
@@ -236,22 +339,116 @@ if [ -n "$GALLERY" ]; then
 
             return {
                 keyHandler: keyHandler,
+                get sortMode() {
+                    return sortModes[sortModeIndex];
+                },
                 togglePinHandler: togglePinHandler
             };
         })();
 
-        var gallery = (function() {
+        var gallery = (function(imageObjs) {
             var rootElement = document.getElementsByTagName("gallery")[0];
 
-            // Defaults
+            // Config
+            var imageObjects = imageObjs;
+
+            // State
             var mode = "tilesmaller";
+            var images;
+            var activeImageIndex = 0;
             var tileFactor = 7;
             const minTileFactor = 2;
             const maxTileFactor = 10;
             var isImagesLabelled = true;
 
-            var images = rootElement.getElementsByTagName("img");
-            var activeImageIndex = 0;
+            // Init
+            document.addEventListener("DOMContentLoaded", function(event) {
+                createImageComponents(menu.sortMode);
+                setMode(mode);
+                setTimeout(function() {
+                    rootElement.style.opacity = "1.0";
+                }, 1000);
+            });
+
+            var createImageComponents = function(sortMode) {
+                // Sort image objects by the given sort mode object
+                for (var i = 0, k; i < sortMode.keys.length; i++) {
+                    k = sortMode.keys[i];
+                    imageObjects.sort(function(a, b) {
+                        if (sortMode.order === 'asc') {
+                            if (a[k] < b[k]) {
+                                return -1;
+                            }
+                            if (a[k] > b[k]) {
+                                return 1;
+                            }
+                        }
+                        if (sortMode.order === 'desc') {
+                            if (a[k] < b[k]) {
+                                return 1;
+                            }
+                            if (a[k] > b[k]) {
+                                return -1;
+                            }
+                        }
+                        return 0;
+                    });
+                }
+                // console.log(sortMode);
+                // console.log(imageObjects);
+
+                // Generate new image components
+                var imageComponents = [];
+                // E.g.
+                // <imageholder>
+                //   <info>
+                //     <label>$i</label>
+                //   </info>
+                //   <img src=\"$i\" />
+                // </imageholder>
+                var imageholder, info, label, img;
+                for (var i = 0; i < imageObjects.length; i++) {
+                    imageholder = document.createElement("imageholder");
+                    info = document.createElement("info");
+                    label = document.createElement("label");
+                    label.innerHTML = Helpers.htmlEntities(imageObjects[i].filename);
+                    img = document.createElement("img");
+                    img.src = encodeURIComponent(imageObjects[i].filename);
+                    img.alt = Helpers.htmlEntities(imageObjects[i].filename);
+
+                    info.appendChild(label);
+                    imageholder.appendChild(info);
+                    imageholder.appendChild(img);
+
+                    imageComponents.push(imageholder);
+                }
+
+                // Add events - Set as element of interest while clicking or focusing
+                var clickOrFocusHandler = function(e) {
+                    if (mode === "stretchx" || mode === "stretchy" ) {
+                        // Tap on image should toggle the menu
+                        menu.togglePinHandler();
+                    }
+                    var ele = event.target || event.srcElement;
+                    var imageholder = ele.parentNode;
+                    var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
+                    setActiveImageIndex(idx);
+                    setMode("stretchy");
+                };
+                for (var i = 0; i < imageComponents.length; i++) {
+                    imageComponents[i].addEventListener("click", clickOrFocusHandler);
+                    imageComponents[i].addEventListener("focus", clickOrFocusHandler);
+                }
+
+                // Replace gallery with new image components
+                rootElement.innerHTML = '';
+                for (var i = 0; i < imageComponents.length; i++) {
+                    rootElement.appendChild(imageComponents[i]);
+                }
+
+                // Cache the image elements
+                images = rootElement.getElementsByTagName("img");
+            };
 
             var stretchx = function() {
                 for (var i = 0; i < images.length; i++) {
@@ -273,8 +470,10 @@ if [ -n "$GALLERY" ]; then
                 setActiveImageIndex(activeImageIndex, true);
             };
 
-            var tilesmaller = function() {
-                tileFactor = tileFactor === maxTileFactor ? maxTileFactor : tileFactor + 1;
+            var tilesmaller = function(preserve) {
+                if (!preserve) {
+                    tileFactor = tileFactor === maxTileFactor ? maxTileFactor : tileFactor + 1;
+                }
                 for (var i = 0; i < images.length; i++) {
                     images[i].parentNode.style.display = "inline-block";
                     images[i].parentNode.style.width = "calc(100% / " + tileFactor + ")";
@@ -284,8 +483,10 @@ if [ -n "$GALLERY" ]; then
                 setActiveImageIndex(activeImageIndex, true);
             };
 
-            var tilelarger = function() {
-                tileFactor = tileFactor === minTileFactor ? minTileFactor : tileFactor - 1;
+            var tilelarger = function(preserve) {
+                if (!preserve) {
+                    tileFactor = tileFactor === minTileFactor ? minTileFactor : tileFactor - 1;
+                }
                 for (var i = 0; i < images.length; i++) {
                     images[i].parentNode.style.display = "inline-block";
                     images[i].parentNode.style.width = "calc(100% / " + tileFactor + ")";
@@ -315,7 +516,7 @@ if [ -n "$GALLERY" ]; then
                 }
             };
 
-            var setMode = function(value) {
+            var setMode = function(value, preserve) {
                 if (value) {
                     mode = value;
                 }
@@ -327,10 +528,10 @@ if [ -n "$GALLERY" ]; then
                         stretchy();
                         break;
                     case "tilesmaller":
-                        tilesmaller();
+                        tilesmaller(preserve);
                         break;
                     case "tilelarger":
-                        tilelarger();
+                        tilelarger(preserve);
                         break;
                     default:
                         break;
@@ -352,7 +553,7 @@ if [ -n "$GALLERY" ]; then
                     scrollToActiveImage();
                 }
                 console.log("[setActiveImageIndex] activeImageIndex: " + activeImageIndex);
-            }
+            };
 
             var setPreviousImageAsActiveImage = function() {
                 if (activeImageIndex <= 0) {
@@ -395,6 +596,29 @@ if [ -n "$GALLERY" ]; then
                 }
                 setActiveImageIndex(idx, true);
             };
+
+            var scrollToActiveImage = function() {
+                console.log("Scrolling to active image, index: " + activeImageIndex + ", offsetTop: " + images[activeImageIndex].parentNode.offsetTop);
+                window.scroll(0, images[activeImageIndex].parentNode.offsetTop);
+            };
+
+            // Set element of interest while scrolling
+            rootElement.addEventListener("wheel", function(e) {
+                if (mode === "stretchx" || mode === "stretchy" ) {
+                    for (var i = images.length - 1; i >= 0; i--) {
+                        if (images[i].parentNode.offsetTop < window.scrollY) {
+                            console.log("Setting active image: " + i);
+                            setActiveImageIndex(i);
+                            break;
+                        }
+                    }
+                }
+            });
+
+            var sort = function(sortMode) {
+                createImageComponents(sortMode);
+                setMode(mode, true);
+            }
 
             var keyHandler = function(event) {
                 var ele = event.target || event.srcElement;
@@ -473,63 +697,6 @@ if [ -n "$GALLERY" ]; then
                 // console.log(keyCode);
             };
 
-            var scrollToActiveImage = function() {
-                console.log("Scrolling to active image, index: " + activeImageIndex + ", offsetTop: " + images[activeImageIndex].parentNode.offsetTop);
-                window.scroll(0, images[activeImageIndex].parentNode.offsetTop);
-            };
-
-            // Set element of interest while scrolling
-            rootElement.addEventListener("wheel", function(e) {
-                if (mode === "stretchx" || mode === "stretchy" ) {
-                    for (var i = images.length - 1; i >= 0; i--) {
-                        if (images[i].parentNode.offsetTop < window.scrollY) {
-                            console.log("Setting active image: " + i);
-                            setActiveImageIndex(i);
-                            break;
-                        }
-                    }
-                }
-            });
-
-            // Set as element of interest while clicking or focusing
-            var clickOrFocusHandler = function(e) {
-                if (mode === "stretchx" || mode === "stretchy" ) {
-                    // Tap on image should toggle the menu
-                    menu.togglePinHandler();
-                }
-                var ele = event.target || event.srcElement;
-                var imageholder = ele.parentNode;
-                var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
-                setActiveImageIndex(idx);
-                setMode("stretchy");
-            };
-            // var showActiveImageLabelHandler = function(e) {
-            //     if (isImagesLabelled) {
-            //         var ele = event.target || event.srcElement;
-            //         var imageholder = ele.parentNode;
-            //         imageholder.getElementsByTagName("label")[0].style.fontSize = "1vw";
-            //     }
-            // };
-            // var hideActiveImageLabelHandler = function(e) {
-            //     if (!isImagesLabelled) {
-            //         var ele = event.target || event.srcElement;
-            //         var imageholder = ele.parentNode;
-            //         imageholder.getElementsByTagName("label")[0].style.fontSize = "0";
-            //     }
-            // };
-            for (var i = 0; i < images.length; i++) {
-                images[i].addEventListener("click", clickOrFocusHandler);
-                images[i].addEventListener("focus", clickOrFocusHandler);
-
-                // images[i].addEventListener("click", showActiveImageLabelHandler);
-                // images[i].addEventListener("focus", showActiveImageLabelHandler);
-                // images[i].addEventListener("mouseenter", showActiveImageLabelHandler);
-
-                // images[i].addEventListener("focusout", hideActiveImageLabelHandler);
-                // images[i].addEventListener("focusout", hideActiveImageLabelHandler);
-                // images[i].addEventListener("mouseleave", hideActiveImageLabelHandler);
-            }
-
             return {
                 get mode() {
                     return mode;
@@ -548,19 +715,20 @@ if [ -n "$GALLERY" ]; then
                         hideAllImageLabels();
                     }
                 },
+                sort: sort,
                 keyHandler: keyHandler
             };
-        })();
+        })(imageObjects);
 
-        // App init
-        gallery.mode = "tilesmaller";
+        // App Events
         window.addEventListener("keydown", function (event) {
             menu.keyHandler(event);
             gallery.keyHandler(event);
         });
     </script>
 </body>
-</html>' >> "$indexHtm"
+</html>
+EOF
         echo "$indexHtm"
     done
 fi
