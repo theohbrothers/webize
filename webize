@@ -179,14 +179,10 @@ if [ -n "$GALLERY" ]; then
             var toggleLabelHandler = function() {
                 var imagelabeller = document.getElementsByTagName("imagelabeller")[0];
                 if (gallery.isImagesLabelled) {
-                    isPinned = true;
                     gallery.isImagesLabelled = false;
-                    rootElement.style.opacity = "";
                     imagelabeller.style.opacity = "0.5";
                 }else {
                     gallery.isImagesLabelled = true;
-                    isPinned = false;
-                    rootElement.style.opacity = "";
                     imagelabeller.style.opacity = "1.0";
                 }
             };
