@@ -544,9 +544,9 @@ cat - >> "$indexHtm" <<'EOF'
                         break;
                     case "tilelarger":
                         if (modePrev === "tilesmaller" || modePrev === "tilelarger") {
-                            tilesmaller();
+                            tilelarger();
                         }else {
-                            tilesmaller(true);
+                            tilelarger(true);
                         }
                         break;
                     default:
