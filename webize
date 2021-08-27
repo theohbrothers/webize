@@ -134,8 +134,8 @@ if [ -n "$GALLERY" ]; then
         <tilesmaller title="Tile smaller (-)" alt="Tile smaller (-)">🐜</tilesmaller>
         <tilelarger title="Tile larger (+)" alt="Tile larger (=)">🦕</tilelarger>
         <imagelabeller title="Show / Hide label (L)" alt="Show / Hide label (L)">🏷</imagelabeller>
-        <pin title="Pin / Unpin menu (P)" alt="Pin / Unpin menu (P)">📌</pin>
         <sort title="Toggle sort mode" alt="Toggle sort mode"></sort><!-- innerHTML will be injected on DOMContentLoaded -->
+        <pin title="Pin / Unpin menu (P)" alt="Pin / Unpin menu (P)">📌</pin>
     </menu>
     <content>
         <gallery></gallery>
@@ -336,13 +336,13 @@ cat - >> "$indexHtm" <<'EOF'
                 if (keyCode === 76) {
                     toggleLabelHandler();
                 }
-                // p key
-                if (keyCode === 80) {
-                    togglePinHandler();
-                }
                 // s key
                 if (keyCode === 83) {
                     toggleSortMode();
+                }
+                // p key
+                if (keyCode === 80) {
+                    togglePinHandler();
                 }
 
                 // console.log(keyCode);
@@ -548,9 +548,9 @@ cat - >> "$indexHtm" <<'EOF'
                         break;
                     case "tilelarger":
                         if (modePrev === "tilesmaller" || modePrev === "tilelarger") {
-                            tilesmaller(preserve);
+                            tilelarger(preserve);
                         }else {
-                            tilesmaller(true);
+                            tilelarger(true);
                         }
                         break;
                     default:
