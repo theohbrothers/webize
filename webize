@@ -518,13 +518,13 @@ cat - >> "$indexHtm" <<'EOF'
             var showAllImageLabels = function() {
                 for (var i = 0; i < images.length; i++) {
                     var imageholder = images[i].parentNode;
-                    imageholder.getElementsByTagName("label")[0].style.fontSize = "1vw";
+                    imageholder.getElementsByTagName("label")[0].style.opacity = "1.0";
                 }
             };
             var hideAllImageLabels = function() {
                 for (var i = 0; i < images.length; i++) {
                     var imageholder = images[i].parentNode;
-                    imageholder.getElementsByTagName("label")[0].style.fontSize = "0";
+                    imageholder.getElementsByTagName("label")[0].style.opacity = "0.0";
                 }
             };
 
