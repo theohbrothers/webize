@@ -578,7 +578,8 @@ cat - >> "$indexHtm" <<'EOF'
 
             var setPreviousImageAsActiveImage = function() {
                 if (activeImageIndex <= 0) {
-                    setActiveImageIndex(0, true);
+                    // Go to end
+                    setActiveImageIndex(images.length - 1, true);
                 }else {
                     var imageholder = images[activeImageIndex].parentNode;
                     var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
@@ -589,7 +590,8 @@ cat - >> "$indexHtm" <<'EOF'
 
             var setNextImageAsActiveImage = function() {
                 if (activeImageIndex >= images.length - 1) {
-                    setActiveImageIndex(images.length - 1, true);
+                    // Go to start
+                    setActiveImageIndex(0, true);
                 }else {
                     var imageholder = images[activeImageIndex].parentNode;
                     var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper

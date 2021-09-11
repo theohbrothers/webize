@@ -46,10 +46,10 @@ Keyboard shortcuts:
 |---|---|
 | LEFT | Previous image
 | RIGHT | Next image
-| UP | Previous image (of previous row in tiled view)
-| DOWN | Next image (of next row in tiled view)
+| UP | Previous image, or previous row in tile mode
+| DOWN | Next image, or next row in tile mode
 | ENTER | Expand image
-| BACKSPACE | Back to tiled view
+| BACKSPACE | Back to tile mode
 | SPACE | Next image
 | ESC | Escape from full screen, or back to tile mode
 | `F` | Mode: Full screen
