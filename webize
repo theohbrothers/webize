@@ -637,7 +637,17 @@ cat - >> "$indexHtm" <<'EOF'
             var setPreviousRowImageAsActiveImage = function() {
                 var imageholder = images[activeImageIndex].parentNode;
                 var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
-                idx -= tileFactor;
+                var rem = images.length % tileFactor;
+                console.log('rem: ' + rem);
+                if (rem > 0 && activeImageIndex + 1 >= images.length - rem) {
+                    // On the last row with a non-full row. We should scroll less than tileFactor thumbnails
+                    var missing = tileFactor - rem;
+                    var missingFromCenter = Math.floor(missing / 2);
+                    console.log('missing: ' + missing + ', missingFromCenter: ' + missingFromCenter);
+                    idx -= tileFactor - missingFromCenter;
+                }else {
+                    idx -= tileFactor;
+                }
                 if (idx <= 0) {
                     idx = 0;
                 }
@@ -654,7 +664,21 @@ cat - >> "$indexHtm" <<'EOF'
             var setNextRowImageAsActiveImage = function() {
                 var imageholder = images[activeImageIndex].parentNode;
                 var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
-                idx += tileFactor;
+                var rem = images.length % tileFactor;
+                var missing = tileFactor - rem;
+                var missingFromCenter = Math.floor(missing / 2);
+                console.log('rem: ' + rem);
+                console.log('missing: ' + missing + ', missingFromCenter: ' + missingFromCenter);
+                if ((activeImageIndex + 1) % tileFactor > 0 && (activeImageIndex + 1) % tileFactor <= missingFromCenter) {
+                    // Scroll to first image on last row
+                    console.log("Scrolling to first image of last row");
+                    idx = images.length - 1 - rem + 1;
+                }else if (rem > 0 && (activeImageIndex + tileFactor + 1) >= images.length - rem) {
+                    // On the row just prior to a non-full last row. We should scroll less than tileFactor thumbnails
+                    idx += tileFactor - missingFromCenter;
+                }else {
+                    idx += tileFactor;
+                }
                 if (idx >= images.length - 1) {
                     idx = images.length - 1;
                 }
