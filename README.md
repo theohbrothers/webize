@@ -48,6 +48,8 @@ Keyboard shortcuts:
 | RIGHT | Next image
 | UP | Previous image, or previous row in tile mode
 | DOWN | Next image, or next row in tile mode
+| PAGEUP | Previous page, or previous page row in tile mode
+| PAGEDOWN | Next page, or next page row in tile mode
 | ENTER | Expand image
 | BACKSPACE | Back to tile mode
 | SPACE | Next image
