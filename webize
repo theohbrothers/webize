@@ -744,6 +744,7 @@ cat - >> "$indexHtm" <<'EOF'
                 if (keyCode === 33) {
                     if (mode === "tilesmaller" || mode === "tilelarger") {
                         setPreviousPageImageAsActiveImage();
+                        event.preventDefault();
                     }else {
                         setScopeImageAsActiveImage();
                     }
@@ -752,6 +753,7 @@ cat - >> "$indexHtm" <<'EOF'
                 if (keyCode === 34) {
                     if (mode === "tilesmaller" || mode === "tilelarger") {
                         setNextPageImageAsActiveImage();
+                        event.preventDefault();
                     }else {
                         setScopeImageAsActiveImage();
                     }
