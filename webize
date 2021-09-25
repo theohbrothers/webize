@@ -604,7 +604,14 @@ cat - >> "$indexHtm" <<'EOF'
                     var imageholder = images[activeImageIndex].parentNode;
                     var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
                     idx -= 1;
-                    setActiveImageIndex(idx, true);
+                    var scroll = (function(images, idx) {
+                        const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+                        if (images[idx].parentNode.offsetTop + images[idx].parentNode.offsetHeight > window.scrollY + viewportHeight) {
+                            return true;
+                        }
+                        return false;
+                    }(images, idx));
+                    setActiveImageIndex(idx, scroll);
                 }
             };
 
@@ -616,7 +623,14 @@ cat - >> "$indexHtm" <<'EOF'
                     var imageholder = images[activeImageIndex].parentNode;
                     var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
                     idx += 1;
-                    setActiveImageIndex(idx, true);
+                    var scroll = (function(images, idx) {
+                        const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+                        if (images[idx].parentNode.offsetTop + images[idx].parentNode.offsetHeight > window.scrollY + viewportHeight) {
+                            return true;
+                        }
+                        return false;
+                    }(images, idx));
+                    setActiveImageIndex(idx, scroll);
                 }
             };
 
@@ -627,7 +641,14 @@ cat - >> "$indexHtm" <<'EOF'
                 if (idx <= 0) {
                     idx = 0;
                 }
-                setActiveImageIndex(idx, true);
+                var scroll = (function(images, idx) {
+                    const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+                    if (images[idx].parentNode.offsetTop < window.scrollY) {
+                        return true;
+                    }
+                    return false;
+                }(images, idx));
+                setActiveImageIndex(idx, scroll);
             };
 
             var setNextRowImageAsActiveImage = function() {
@@ -637,7 +658,14 @@ cat - >> "$indexHtm" <<'EOF'
                 if (idx >= images.length - 1) {
                     idx = images.length - 1;
                 }
-                setActiveImageIndex(idx, true);
+                var scroll = (function(images, idx) {
+                    const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+                    if (images[idx].parentNode.offsetTop + images[idx].parentNode.offsetHeight > window.scrollY + viewportHeight) {
+                        return true;
+                    }
+                    return false;
+                }(images, idx));
+                setActiveImageIndex(idx, scroll);
             };
 
             var setPreviousPageImageAsActiveImage = function() {
