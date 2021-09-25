@@ -819,6 +819,14 @@ cat - >> "$indexHtm" <<'EOF'
                         setScopeImageAsActiveImage();
                     }
                 }
+                // Home
+                if (keyCode === 36) {
+                    setActiveImageIndex(0, true);
+                }
+                // End
+                if (keyCode === 35) {
+                    setActiveImageIndex(images.length - 1, true);
+                }
                 // ENTER key
                 if (keyCode === 13) {
                     setMode("stretchy");

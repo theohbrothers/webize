@@ -50,6 +50,8 @@ Keyboard shortcuts:
 | DOWN | Next image, or next row in tile mode
 | PAGEUP | Previous page, or previous page row in tile mode
 | PAGEDOWN | Next page, or next page row in tile mode
+| HOME | First image
+| END | Last image
 | ENTER | Expand image
 | BACKSPACE | Back to tile mode
 | SPACE | Next image
