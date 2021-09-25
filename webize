@@ -606,7 +606,7 @@ cat - >> "$indexHtm" <<'EOF'
                     idx -= 1;
                     var scroll = (function(images, idx) {
                         const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-                        if (images[idx].parentNode.offsetTop + images[idx].parentNode.offsetHeight > window.scrollY + viewportHeight) {
+                        if (images[idx].parentNode.offsetTop < window.scrollY) {
                             return true;
                         }
                         return false;
