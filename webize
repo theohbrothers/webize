@@ -488,9 +488,16 @@ cat - >> "$indexHtm" <<'EOF'
                 }
                 for (var i = 0; i < images.length; i++) {
                     images[i].parentNode.style.display = "inline-block";
+                    images[i].parentNode.style.verticalAlign = "top";
                     images[i].parentNode.style.width = "calc(100% / " + tileFactor + ")";
-                    images[i].style.width = "100%";
-                    images[i].style.height = "auto";
+                    images[i].parentNode.style.height = "calc(100% / " + tileFactor + ")";
+                    if (images[i].width >= images[i].height) {
+                        images[i].style.width = "100%";
+                        images[i].style.height = "auto";
+                    }else {
+                        images[i].style.width = "auto";
+                        images[i].style.height = "100%";
+                    }
                 }
                 setActiveImageIndex(activeImageIndex, true);
             };
@@ -501,9 +508,16 @@ cat - >> "$indexHtm" <<'EOF'
                 }
                 for (var i = 0; i < images.length; i++) {
                     images[i].parentNode.style.display = "inline-block";
+                    images[i].parentNode.style.verticalAlign = "top";
                     images[i].parentNode.style.width = "calc(100% / " + tileFactor + ")";
-                    images[i].style.width = "100%";
-                    images[i].style.height = "auto";
+                    images[i].parentNode.style.height = "calc(100% / " + tileFactor + ")";
+                    if (images[i].width >= images[i].height) {
+                        images[i].style.width = "100%";
+                        images[i].style.height = "auto";
+                    }else {
+                        images[i].style.width = "auto";
+                        images[i].style.height = "100%";
+                    }
                 }
                 setActiveImageIndex(activeImageIndex, true);
             };
