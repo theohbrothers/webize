@@ -620,13 +620,58 @@ cat - >> "$indexHtm" <<'EOF'
                 setActiveImageIndex(idx, true);
             };
 
+            var setPreviousPageImageAsActiveImage = function() {
+                const imageholderMaxHeight = (function(images) {
+                    // Find the tallest image in the first row
+                    var max = 0, lastmax = 0;
+                    for (var i = 0; i < images.length - 1 && i < tileFactor; i++) {
+                        tmp =  images[i].parentNode.offsetHeight;
+                        max = tmp > max ? tmp : max;
+                    }
+                    return max;
+                })(images);
+                const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+                const rows = Math.floor(viewportHeight / imageholderMaxHeight); // Number of rows of thumbnails that fit in viewport without being cut off
+                console.log('rows: ' + rows);
+
+                var imageholder = images[activeImageIndex].parentNode;
+                var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
+                idx -= tileFactor * (rows - 1)
+                if (idx <= 0) {
+                    idx = 0;
+                }
+                setActiveImageIndex(idx, true);
+            };
+            var setNextPageImageAsActiveImage = function() {
+                const imageholderMaxHeight = (function(images) {
+                    // Find the tallest image in the first row
+                    var max = 0, lastmax = 0;
+                    for (var i = 0; i < images.length - 1 && i < tileFactor; i++) {
+                        tmp =  images[i].parentNode.offsetHeight;
+                        max = tmp > max ? tmp : max;
+                    }
+                    return max;
+                })(images);
+                const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+                const rows = Math.floor(viewportHeight / imageholderMaxHeight); // Number of rows of thumbnails that fit in viewport without being cut off
+                console.log('rows: ' + rows);
+
+                var imageholder = images[activeImageIndex].parentNode;
+                var idx = Array.from(imageholder.parentNode.children).indexOf(imageholder); // Wrapper
+                idx += tileFactor * (rows - 1); // If starting at row 1, and screen only fits 5 rows, with 6th row cut off, scroll to first image of 5th row
+
+                if (idx >= images.length - 1) {
+                    idx = images.length - 1;
+                }
+                setActiveImageIndex(idx, true);
+            };
+
             var scrollToActiveImage = function() {
                 console.log("Scrolling to active image, index: " + activeImageIndex + ", offsetTop: " + images[activeImageIndex].parentNode.offsetTop);
                 window.scroll(0, images[activeImageIndex].parentNode.offsetTop);
             };
 
-            // Set element of interest while scrolling
-            rootElement.addEventListener("wheel", function(e) {
+            var setScopeImageAsActiveImage = function() {
                 if (mode === "stretchx" || mode === "stretchy" ) {
                     for (var i = images.length - 1; i >= 0; i--) {
                         if (images[i].parentNode.offsetTop < window.scrollY) {
@@ -636,6 +681,10 @@ cat - >> "$indexHtm" <<'EOF'
                         }
                     }
                 }
+            }
+            // Set element of interest while scrolling
+            rootElement.addEventListener("wheel", function(e) {
+                setScopeImageAsActiveImage();
             });
 
             var sort = function(sortMode) {
@@ -646,6 +695,8 @@ cat - >> "$indexHtm" <<'EOF'
             var keyHandler = function(event) {
                 var ele = event.target || event.srcElement;
                 var keyCode = event.keyCode || event.charCode;
+                var key = event.key;
+                console.log('keyCode: ' + keyCode + ', key: ' + key);
 
                 // LEFT arrow key
                 if (keyCode === 37) {
@@ -674,6 +725,22 @@ cat - >> "$indexHtm" <<'EOF'
                         setNextImageAsActiveImage();
                     }
                     event.preventDefault();
+                }
+                // PageUp
+                if (keyCode === 33) {
+                    if (mode === "tilesmaller" || mode === "tilelarger") {
+                        setPreviousPageImageAsActiveImage();
+                    }else {
+                        setScopeImageAsActiveImage();
+                    }
+                }
+                // PageDown
+                if (keyCode === 34) {
+                    if (mode === "tilesmaller" || mode === "tilelarger") {
+                        setNextPageImageAsActiveImage();
+                    }else {
+                        setScopeImageAsActiveImage();
+                    }
                 }
                 // ENTER key
                 if (keyCode === 13) {
