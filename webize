@@ -123,7 +123,7 @@ if [ -n "$GALLERY" ]; then
         imageholder { position: relative; display: inline-block; margin: 0 auto; border: 1px solid transparent; }
         imageholder.highlight { border: 1px solid #fff; }
         imageholder info { position: absolute; top: 0; left: 0; right: 0; z-index: 0; }
-        imageholder info label { display: block; background: #000; color: #fff; font-size: 1vw; line-height: 1vw; font-family: monospace; }
+        imageholder info label { display: block; background: #000; color: #fff; font-size: 1vw; line-height: 1vw; font-family: monospace; overflow: hidden; }
         imageholder img { display: inline-block; margin: 0 auto; width: 100%; height: auto; }
     </style>
 </head>
