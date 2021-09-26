@@ -467,7 +467,7 @@ cat - >> "$indexHtm" <<'EOF'
                     images[i].parentNode.style.display = "inline-block";
                     images[i].parentNode.style.width = "100vw";
                     images[i].parentNode.style.height = "100vh";
-                    images[i].style.width = "100vw";
+                    images[i].style.width = "100%";
                     images[i].style.height = "auto";
                 }
                 setActiveImageIndex(activeImageIndex, true);
@@ -479,7 +479,7 @@ cat - >> "$indexHtm" <<'EOF'
                     images[i].parentNode.style.width = "100vw";
                     images[i].parentNode.style.height = "100vh";
                     images[i].style.width = "auto";
-                    images[i].style.height = "100vh";
+                    images[i].style.height = "100%";
                 }
                 setActiveImageIndex(activeImageIndex, true);
             };
@@ -493,14 +493,14 @@ cat - >> "$indexHtm" <<'EOF'
                     images[i].parentNode.style.verticalAlign = "top";
                     images[i].parentNode.style.width = "calc(100vw / " + tileFactor + ")";
                     images[i].parentNode.style.height = "calc(100vw / " + tileFactor + ")";
-                    if (images[i].width >= images[i].height) {
+                    if (images[i].naturalWidth >= images[i].naturalHeight) {
                         // Landscape
-                        images[i].style.width = "calc(100vw / " + tileFactor + ")";
+                        images[i].style.width = "100%";
                         images[i].style.height = "auto";
                     }else {
                         // Portrait
                         images[i].style.width = "auto";
-                        images[i].style.height = "calc(100vw / " + tileFactor + ")";
+                        images[i].style.height = "100%";
                     }
                 }
                 setActiveImageIndex(activeImageIndex, true);
@@ -515,14 +515,14 @@ cat - >> "$indexHtm" <<'EOF'
                     images[i].parentNode.style.verticalAlign = "top";
                     images[i].parentNode.style.width = "calc(100vw / " + tileFactor + ")";
                     images[i].parentNode.style.height = "calc(100vw / " + tileFactor + ")";
-                    if (images[i].width >= images[i].height) {
+                    if (images[i].naturalWidth >= images[i].naturalHeight) {
                         // Landscape
-                        images[i].style.width = "calc(100vw / " + tileFactor + ")";
+                        images[i].style.width = "100%";
                         images[i].style.height = "auto";
                     }else {
                         // Portrait
                         images[i].style.width = "auto";
-                        images[i].style.height = "calc(100vw / " + tileFactor + ")";
+                        images[i].style.height = "100%";
                     }
                 }
                 setActiveImageIndex(activeImageIndex, true);
