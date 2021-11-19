@@ -92,7 +92,7 @@ if [ -n "$GALLERY" ]; then
         indexHtm="$d/index.htm"
         imagesCsv=$(
             # Get only files, ignore the first line of ls -al, then parse file attributes into a single CSV. E.g. -rwxr-xr-x 1 packer packer 22681 2021-08-27T07:36:45+0000 webize -> webize,22681,2021-08-27T07:36:45+0000
-            if echo "$OSTYPE" | grep -qE 'darwin'; then
+            if echo "${OSTYPE:-}" | grep -qE 'darwin'; then
                 cd "$d"
                 files=$( stat -l -t '%Y-%m-%dT%H:%M:%S%z' * )
             else
