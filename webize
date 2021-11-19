@@ -74,23 +74,23 @@ fi
 
 # Get directories with images
 IMAGES_REGEX='\.gif|\.jpg|\.png|\.svg|\.webp'
-dirs=$(
+DIRS=$(
     find "$DIR" -type d | while read -r d; do
         if ls -p "$d" | grep -v '/' | grep -E "$IMAGES_REGEX" > /dev/null; then
             echo "$d"
         fi
     done | sort -n
 )
-if [ -z "$dirs" ]; then
+if [ -z "$DIRS" ]; then
     echo "No directories with images found." 1>&2
     exit 1
 fi
 
 # Generate index.htm in each directory
 if [ -n "$GALLERY" ]; then
-    echo "$dirs" | while read -r d; do
-        indexHtm="$d/index.htm"
-        imagesCsv=$(
+    echo "$DIRS" | while read -r d; do
+        INDEX_HTM="$d/index.htm"
+        IMAGES_CSV=$(
             # Get only files, ignore the first line of ls -al, then parse file attributes into a single CSV. E.g. -rwxr-xr-x 1 packer packer 22681 2021-08-27T07:36:45+0000 webize -> webize,22681,2021-08-27T07:36:45+0000
             if echo "${OSTYPE:-}" | grep -qE 'darwin'; then
                 cd "$d"
@@ -107,7 +107,7 @@ if [ -n "$GALLERY" ]; then
                 echo "$filename,$size,$dateiso,$extension"
             done
         )
-        cat - > "$indexHtm" <<'EOF'
+        cat - > "$INDEX_HTM" <<'EOF'
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -143,16 +143,16 @@ if [ -n "$GALLERY" ]; then
     </content>
     <script>
         // Images
-        const imagesCsv = `
+        const IMAGES_CSV = `
 EOF
-    echo "$imagesCsv" >> "$indexHtm"
-cat - >> "$indexHtm" <<'EOF'
+    echo "$IMAGES_CSV" >> "$INDEX_HTM"
+cat - >> "$INDEX_HTM" <<'EOF'
 `;
         // Parse into image objects
-        const imageObjects = (function(imagesCsv) {
+        const imageObjects = (function(IMAGES_CSV) {
             var imageObjects = [];
 
-            var split = imagesCsv.split(/\n/).filter(function (v) { return v !== ''; });
+            var split = IMAGES_CSV.split(/\n/).filter(function (v) { return v !== ''; });
             for (var i = 0; i < split.length; i++) {
                 var fileAttr = split[i].split(/,/);
                 imageObjects.push({
@@ -164,7 +164,7 @@ cat - >> "$indexHtm" <<'EOF'
             }
 
             return imageObjects;
-        }(imagesCsv));
+        }(IMAGES_CSV));
 
         var Helpers = (function () {
             return {
@@ -904,17 +904,17 @@ cat - >> "$indexHtm" <<'EOF'
 </body>
 </html>
 EOF
-        echo "$indexHtm"
+        echo "$INDEX_HTM"
     done
 fi
 
 # Remove index.htm in each directory
 if [ -n "$CLEAN" ]; then
-    echo "$dirs" | while read -r d; do
-        indexHtm="$d/index.htm"
-        if [ -f "$indexHtm" ]; then
-            rm -f "$indexHtm"
-            echo "$indexHtm"
+    echo "$DIRS" | while read -r d; do
+        INDEX_HTM="$d/index.htm"
+        if [ -f "$INDEX_HTM" ]; then
+            rm -f "$INDEX_HTM"
+            echo "$INDEX_HTM"
         fi
     done
 fi
