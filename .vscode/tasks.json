@@ -4,16 +4,25 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "echo",
+            "label": "docker-compose up",
             "type": "shell",
-            "command": "./webize gallery .",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "command": "docker-compose up",
+            "group": "build"
         },
         {
-            "label": "echo",
+            "label": "docker-compose -f docker-compose.traefik.yml up",
+            "type": "shell",
+            "command": "docker-compose -f docker-compose.traefik.yml up",
+            "group": "build"
+        },
+        {
+            "label": "./webize gallery .",
+            "type": "shell",
+            "command": "./webize gallery .",
+            "group": "build"
+        },
+        {
+            "label": "./webize clean .",
             "type": "shell",
             "command": "./webize clean .",
             "group": "build"
