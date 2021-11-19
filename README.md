@@ -36,6 +36,9 @@ At present, gallery is kept as minimalistic as possible. But it might already be
 cd /path/to
 webize gallery . | xargs firefox
 
+# Or, open in default web browser on a mac
+webize gallery . | xargs open
+
 # Cleanup once you are done
 webize clean .
 ```
@@ -64,3 +67,21 @@ Keyboard shortcuts:
 | `L` | Mode: Show / Hide label
 | `S` | Mode: Toggle sort mode
 | `P` | Menu: Pin / Unpin menu
+
+## Development
+
+Available as [vscode tasks](.vscode/tasks.json).
+
+```sh
+cd /path/to/webize
+# First, make some pictures available
+cp -rf /path/to/pictures .pictures
+
+# Debug (Local browser)
+./webize gallery . | xargs firefox
+
+# Debug (Remote browser)
+./webize gallery .
+docker-compose up
+curl --head http://yourserver:8080/.pictures/index.htm
+```

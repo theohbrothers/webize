@@ -1,5 +1,6 @@
 /.*
 
+!/.env
 !/.github
 !/.gitignore
 !/.vscode

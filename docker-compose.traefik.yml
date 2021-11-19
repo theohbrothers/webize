@@ -1,19 +1,14 @@
+# Creates an nginx, proxied by traefik on port 8080, with caching disabled using Cache-Control HTTP headers. This is useful when working behind a reverse proxy, e.g. cloudflare.
 version: '2.2'
 services:
-
   web:
     image: nginx:1.14-alpine
     # Enable labels for traefik
     labels:
-      # Override the network that traefik should use
-      # - "traefik.docker.network=<project_name>_default"
-      # traefik v1
-      - "traefik.port=80"
-      - "traefik.frontend.entryPoints=web"
-      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
-      # - "traefik.frontend.rule=PathPrefix:/"
-      - "traefik.frontend.headers.customResponseHeaders=Cache-Control:private, no-cache, no-store, must-revalidate, max-age=0, s-maxage=0||Pragma:no-cache"
       # traefik v2
+      - "traefik.enable=true"
+      - 'project.name=${COMPOSE_PROJECT_NAME}' # Constraint for traefik
+      # - "traefik.docker.network=${COMPOSE_PROJECT_NAME}_default" # Override the network that traefik should use
       - "traefik.http.services.web.loadbalancer.server.port=80"
       - "traefik.http.routers.web.entrypoints=web"
       - "traefik.http.routers.web.rule=HostRegexp(`{catchall:.*}`)"
@@ -22,26 +17,10 @@ services:
       - "traefik.http.middlewares.nocache.headers.customResponseHeaders.Cache-Control=private, no-cache, no-store, must-revalidate, max-age=0, s-maxage=0"
       - "traefik.http.middlewares.nocache.headers.customResponseHeaders.Pragma=no-cache"
     networks:
+      # The default '${COMPOSE_PROJECT_NAME}_default' network
       - default
     volumes:
-      - ./:/usr/share/nginx/html:ro
-
-  # Run traefik v1 on port 8081
-  traefik-v1:
-    image: traefik:v1.7-alpine
-    command:
-      # - --logLevel=DEBUG
-      - --docker
-      - --docker.watch
-      - --docker.exposedByDefault=true # Make traefik proxy over the default network created by docker-compose, i.e. '<project_name>_default'. This makes this configuration portable to any project.
-      - --entryPoints=Name:web Address::80
-    networks:
-      - default
-    ports:
-      - 8081:80
-    volumes:
-      # Allow traefik to listen to the Docker events
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - .:/usr/share/nginx/html:ro
 
   # Run traefik v2 on port 8080
   traefik-v2:
@@ -49,10 +28,11 @@ services:
     command:
       # - --log.level=DEBUG
       - --providers.docker=true
-      - --providers.docker.exposedbydefault=true # Make traefik proxy over the default network created by docker-compose, i.e. '<project_name>_default'. This makes this configuration portable to any project.
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.constraints=Label(`project.name`,`${COMPOSE_PROJECT_NAME}`)
       - --entrypoints.web.address=:80
     networks:
-      # The default '<project_name>_default' network
+      # The default '${COMPOSE_PROJECT_NAME}_default' network
       - default
     ports:
       - 8080:80
@@ -61,5 +41,5 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
 networks:
-  # The default '<project_name>_default' network
+  # The default '${COMPOSE_PROJECT_NAME}_default' network
   default:
