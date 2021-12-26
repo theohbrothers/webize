@@ -123,7 +123,6 @@ if [ -n "$GALLERY" ]; then
         content { display: block; text-align: center; }
         gallery { display: inline-block; width: 100%; text-align: center; vertical-align: middle; opacity: 0; }
         imageholder { position: relative; display: inline-block; margin: 0 auto; border: 1px solid transparent; }
-        imageholder.highlight { border: 1px solid #fff; }
         imageholder info { position: absolute; top: 0; left: 0; right: 0; z-index: 0; }
         imageholder info label { display: block; background: #000; color: #fff; font-size: 1vw; line-height: 1vw; font-family: monospace; overflow: hidden; }
         imageholder img { display: inline-block; margin: 0 auto; width: 100%; height: auto; }
@@ -588,11 +587,11 @@ cat - >> "$INDEX_HTM" <<'EOF'
                 var imageholder;
                 for (var i = 0; i < images.length; i++) {
                     imageholder = images[i].parentNode;
-                    imageholder.className = "";
+                    imageholder.style.border = "";
                 }
-                imageholder = images[activeImageIndex].parentNode;
                 if (mode === "tilesmaller" || mode === "tilelarger") {
-                    imageholder.className = "highlight";
+                    var activeImageholder = images[activeImageIndex].parentNode;
+                    activeImageholder.style.border = "1px solid #fff";
                 }
                 if (scroll) {
                     scrollToActiveImage();
