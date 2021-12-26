@@ -585,11 +585,19 @@ cat - >> "$INDEX_HTM" <<'EOF'
             var setActiveImageIndex = function(value, scroll) {
                 activeImageIndex = value;
                 var imageholder;
-                for (var i = 0; i < images.length; i++) {
-                    imageholder = images[i].parentNode;
-                    imageholder.style.border = "";
-                }
-                if (mode === "tilesmaller" || mode === "tilelarger") {
+                if (mode === "stretchx" || mode === "stretchy") {
+                    for (var i = 0; i < images.length; i++) {
+                        imageholder = images[i].parentNode;
+                        imageholder.style.display = "none";
+                        imageholder.style.border = "";
+                    }
+                    var activeImageholder = images[activeImageIndex].parentNode;
+                    activeImageholder.style.display = "block";
+                }else if (mode === "tilesmaller" || mode === "tilelarger") {
+                    for (var i = 0; i < images.length; i++) {
+                        imageholder = images[i].parentNode;
+                        imageholder.style.border = "";
+                    }
                     var activeImageholder = images[activeImageIndex].parentNode;
                     activeImageholder.style.border = "1px solid #fff";
                 }
