@@ -88,9 +88,10 @@ fi
 
 # Generate index.htm in each directory
 if [ -n "$GALLERY" ]; then
-    echo "$DIRS" | while read -r d; do
-        INDEX_HTM="$d/index.htm"
-        IMAGES_CSV=$(
+    INDEX_HTM="index.htm"
+    IMAGES_CSV=$(
+        echo "$DIRS" | while read -r d; do
+
             # Get only files, ignore the first line of ls -al, then parse file attributes into a single CSV. E.g. -rwxr-xr-x 1 packer packer 22681 2021-08-27T07:36:45+0000 webize -> webize,22681,2021-08-27T07:36:45+0000
             if echo "${OSTYPE:-}" | grep -qE 'darwin'; then
                 cd "$d"
@@ -104,10 +105,11 @@ if [ -n "$GALLERY" ]; then
                 dateiso=$( echo "$l" | awk '{print $6}' )
                 filename=$( echo "$l" | awk '{print $1=$2=$3=$4=$5=$6=""; print $0}' | awk NF | sed 's/^[ ]*//g' )
                 extension=$( echo "$filename" | sed 's/.*\(\.[^.]*\)$/\1/' )
-                echo "$filename,$size,$dateiso,$extension"
+                echo "$d/$filename,$size,$dateiso,$extension"
             done
-        )
-        cat - > "$INDEX_HTM" <<'EOF'
+        done
+    )
+    cat - > "$INDEX_HTM" <<'EOF'
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -425,7 +427,7 @@ cat - >> "$INDEX_HTM" <<'EOF'
                     label = document.createElement("label");
                     label.innerHTML = Helpers.htmlEntities(imageObjects[i].filename);
                     img = document.createElement("img");
-                    img.src = encodeURIComponent(imageObjects[i].filename);
+                    img.src = 'file://' + imageObjects[i].filename;
                     img.alt = Helpers.htmlEntities(imageObjects[i].filename);
 
                     info.appendChild(label);
@@ -906,8 +908,7 @@ cat - >> "$INDEX_HTM" <<'EOF'
 </body>
 </html>
 EOF
-        echo "$INDEX_HTM"
-    done
+    echo "$INDEX_HTM"
 fi
 
 # Remove index.htm in each directory
