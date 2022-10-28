@@ -375,7 +375,7 @@ cat - >> "$INDEX_HTM" <<'EOF'
             var mode = "tilesmaller";
             var images;
             var activeImageIndex = 0;
-            var tileFactor = 7;
+            var tileFactor = 3;
             const minTileFactor = 2;
             const maxTileFactor = 10;
             var isImagesLabelled = true;
