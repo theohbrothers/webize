@@ -10,6 +10,8 @@ usage() {
     echo '                              If omitted, image search is recursive'
     echo '  clean [--scoped] <dir>      Cleanup index.htm'
     echo "    -s|--scoped               Scope index.htm to each descendent directory"
+    echo 'Options:'
+    echo "    -v|--verbose              Verbose"
     echo 'Examples: '
     echo '  # Linux: Generate index.htm in /path/to for all descendent image files, and opens it in firefox'
     echo '  ./webize gallery /path/to | xargs firefox'
@@ -44,6 +46,10 @@ while test $# -gt 0; do
             SCOPED=1
             shift
             ;;
+        -v|--verbose)
+            VERBOSE=1
+            shift
+            ;;
         *)
             DIR="$1"
             shift
@@ -56,6 +62,7 @@ DIR=${DIR:-}
 GALLERY=${GALLERY:-}
 CLEAN=${CLEAN:-}
 SCOPED=${SCOPED:-}
+VERBOSE=${VERBOSE:-}
 
 # Normalization
 DIR=$( echo "$DIR" | sed 's@/$@@' ) # Trim trailing '/'
@@ -84,6 +91,9 @@ fi
 # Generate a index.htm in current directory
 if [ -n "$GALLERY" ]; then
     echo "$DIRS" | while read -r d; do
+        if [ -n "$VERBOSE" ]; then
+            echo "Searching directory: $d" >&2
+        fi
         IMAGES_REGEX='(\.gif|\.jpe?g|\.png|\.svg|\.webp)$'
         IMAGES=$(
             if [ -n "$SCOPED" ]; then
@@ -975,6 +985,9 @@ fi
 # Remove index.htm in each directory
 if [ -n "$CLEAN" ]; then
     echo "$DIRS" | while read -r d; do
+        if [ -n "$VERBOSE" ]; then
+            echo "Searching directory: $d" >&2
+        fi
         INDEX_HTM="$d/index.htm"
         if [ -f "$INDEX_HTM" ]; then
             rm -f "$INDEX_HTM"
