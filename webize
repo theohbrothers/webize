@@ -31,7 +31,7 @@ while test $# -gt 0; do
             GALLERY=1
             shift
             if test $# -gt 0; then
-                export DIR="$1"
+                DIR="$1"
                 shift
             else
                 echo "Please specify a directory as a third argument. E.g. /path/to, or . for current directory" 1>&2
@@ -42,7 +42,7 @@ while test $# -gt 0; do
             CLEAN=1
             shift
             if test $# -gt 0; then
-                export DIR="$1"
+                DIR="$1"
                 shift
             else
                 echo "Please specify a directory as a third argument. E.g. /path/to, or . for current directory" 1>&2
@@ -67,49 +67,36 @@ if [ ! -d "$DIR" ]; then
 fi
 DIR=$( echo "$DIR" | sed 's@/$@@' ) # Trim trailing '/'
 
-# Get directories with images
-IMAGES_REGEX='(\.gif|\.jpe?g|\.png|\.svg|\.webp)$'
-DIRS=$(
-    find "$DIR" -type d | while read -r d; do
-        if ls -p "$d" | grep -v '/' | grep -iE "$IMAGES_REGEX" > /dev/null; then
-            echo "$d"
-        fi
-    done | sort -n
-)
-if [ -z "$DIRS" ]; then
-    echo "No directories with images found." 1>&2
-    exit 1
+PLATFORM=linux
+if echo "${OSTYPE:-}" | grep -iE 'darwin' > /dev/null; then
+    PLATFORM=darwin
+fi
+if ! ls -al --time-style='+%Y' > /dev/null 2>&1; then
+    PLATFORM=busybox
 fi
 
 # Generate a index.htm in current directory
 if [ -n "$GALLERY" ]; then
-    INDEX_HTM="index.htm"
+    # Get images files, then parse file attributes into a single CSV
+    # E.g.:
+    #   -rwxr-xr-x 1 user user 22681 2021-08-27T07:36:45+0000 /path/to/my.png
+    # Becomes:
+    #   /path/to/my.png,22681,2021-08-27T07:36:45+0000
+    IMAGES_REGEX='(\.gif|\.jpe?g|\.png|\.svg|\.webp)$'
     IMAGES_CSV=$(
-        echo "$DIRS" | while read -r d; do
-            # Get only files, ignore the first line of ls -al, then parse file attributes into a single CSV
-            # E.g.:
-            #   -rwxr-xr-x 1 user user 22681 2021-08-27T07:36:45+0000 webize
-            # Becomes:
-            #   webize,22681,2021-08-27T07:36:45+0000
-            if echo "${OSTYPE:-}" | grep -qE 'darwin'; then
-                cd "$d"
-                files=$( stat -l -t '%Y-%m-%dT%H:%M:%S%z' * )
-            else
-                files=$( ls -al --time-style='+%Y-%m-%dT%H:%M:%S%z' -p "$d" 2>/dev/null || ls -al --full-time -p "$d" | awk '{print $1,$2,$3,$4,$5,$6$7$8,$9}' )
-            fi
-            echo "$files" | grep -v '/' | grep -iE "$IMAGES_REGEX" | while read -r l; do
-                size=$( echo "$l" | awk '{print $5}' )
-                dateiso=$( echo "$l" | awk '{print $6}' )
-                filename=$( echo "$l" | awk '{print $1=$2=$3=$4=$5=$6=""; print $0}' | awk NF | sed 's/^[ ]*//g' )
-                extension=$( echo "$filename" | sed 's/.*\(\.[^.]*\)$/\1/' )
-                echo "$d/$filename,$size,$dateiso,$extension"
-            done
-        done
+        if [ "$PLATFORM" = 'darwin' ]; then
+            find "$DIR" -type f | grep -iE "$IMAGES_REGEX" | while read -r f; do stat -l -t '%Y-%m-%dT%H:%M:%S%z' "$f" | while read -r a b c d size dateiso filename; do echo "$filename,$size,$dateiso"; done; done
+        elif [ "$PLATFORM" = 'busybox' ]; then
+            find "$DIR" -type f | grep -iE "$IMAGES_REGEX" | while read -r f; do ls -al --full-time "$f" | while read -r a b c d size date time timezone filename; do echo "$filename,$size,${date}T${time}${timezone}"; done; done
+        else
+            find "$DIR" -type f | grep -iE "$IMAGES_REGEX" | while read -r f; do ls -al --time-style='+%Y-%m-%dT%H:%M:%S%z' "$f" | while read -r a b c d size dateiso filename; do echo "$filename,$size,$dateiso"; done; done
+        fi
     )
     if [ -z "$IMAGES_CSV" ]; then
         echo "No images found in: $DIR"
         exit 1
     fi
+    INDEX_HTM="$DIR/index.htm"
     cat - > "$INDEX_HTM" <<'EOF'
 <html lang="en">
 <head>
@@ -157,12 +144,14 @@ cat - >> "$INDEX_HTM" <<'EOF'
             var split = IMAGES_CSV.split(/\n/).filter(function (v) { return v !== ''; });
             for (var i = 0; i < split.length; i++) {
                 var fileAttr = split[i].split(/,/);
+                var filenameSplit = fileAttr[0].split(/\./);
                 imageObjects.push({
                     filename: fileAttr[0],
                     size: fileAttr[1],
                     dateiso: fileAttr[2],
-                    extension: fileAttr[3],
+                    extension: filenameSplit[filenameSplit.length - 1],
                  });
+                 console.log(filenameSplit);
             }
 
             return imageObjects;
