@@ -1,120 +1,3 @@
-#!/bin/sh
-
-set -u
-
-usage() {
-    echo 'Usage: ./webize [OPTIONS]'
-    echo 'Subcommands:'
-    echo '  gallery [--scoped] <dir>    Generate a gallery index.htm'
-    echo "    -s|--scoped               Scope index.htm to each descendent directory"
-    echo '                              If omitted, image search is recursive'
-    echo '  clean [--scoped] <dir>      Cleanup index.htm'
-    echo "    -s|--scoped               Scope index.htm to each descendent directory"
-    echo 'Examples: '
-    echo '  # Linux: Generate index.htm in /path/to for all descendent image files, and opens it in firefox'
-    echo '  ./webize gallery /path/to | xargs firefox'
-    echo '  # Cleanup index.htm'
-    echo '  ./webize clean /path/to'
-    echo
-    echo '  # Linux: Generate a scoped index.htm in each descendent folder of /path/to, and opens it in firefox'
-    echo '  ./webize gallery -s /path/to | xargs firefox'
-    echo '  # Cleanup index.htm'
-    echo '  ./webize clean -s  /path/to'
-    echo
-}
-# Exit if we got no options
-if [ $# -eq 0 ]; then usage; exit 1; fi
-
-# Get some options
-while test $# -gt 0; do
-    case "$1" in
-        help|-h|--help)
-            usage
-            exit 0
-            ;;
-        gallery)
-            GALLERY=1
-            shift
-            ;;
-        clean)
-            CLEAN=1
-            shift
-            ;;
-        -s|--scoped)
-            SCOPED=1
-            shift
-            ;;
-        *)
-            DIR="$1"
-            shift
-            ;;
-    esac
-done
-
-# Configuration
-DIR=${DIR:-}
-GALLERY=${GALLERY:-}
-CLEAN=${CLEAN:-}
-SCOPED=${SCOPED:-}
-
-# Normalization
-DIR=$( echo "$DIR" | sed 's@/$@@' ) # Trim trailing '/'
-DIR=$( cd "$DIR" && pwd )
-
-# Validation
-if [ ! -d "$DIR" ]; then
-    echo "Directory does not exist: $DIR" 1>&2
-    exit 1
-fi
-
-PLATFORM=linux
-if echo "${OSTYPE:-}" | grep -iE 'darwin' > /dev/null; then
-    PLATFORM=darwin
-fi
-if ! ls -al --time-style='+%Y' > /dev/null 2>&1; then
-    PLATFORM=busybox
-fi
-
-if [ -n "$SCOPED" ]; then
-    DIRS=$( find "$DIR" -type d )
-else
-    DIRS="$DIR"
-fi
-
-# Generate a index.htm in current directory
-if [ -n "$GALLERY" ]; then
-    echo "$DIRS" | while read -r d; do
-        IMAGES_REGEX='(\.gif|\.jpe?g|\.png|\.svg|\.webp)$'
-        IMAGES=$(
-            if [ -n "$SCOPED" ]; then
-                find "$d" -type f -maxdepth 1 | grep -iE "$IMAGES_REGEX"
-            else
-                find "$d" -type f | grep -iE "$IMAGES_REGEX"
-            fi
-        )
-        if [ -n "$SCOPED" ] && [ -z "$IMAGES" ]; then
-            continue
-        fi
-        if [ -z "$SCOPED" ] && [ -z "$IMAGES" ]; then
-            echo "No images found in: $d" >&2
-            exit 1
-        fi
-        IMAGES_CSV=$(
-            # Get images files, then parse file attributes into a single CSV
-            # E.g.:
-            #   -rwxr-xr-x 1 user user 22681 2021-08-27T07:36:45+0000 /path/to/my.png
-            # Becomes:
-            #   /path/to/my.png,22681,2021-08-27T07:36:45+0000
-            if [ "$PLATFORM" = 'darwin' ]; then
-                echo "$IMAGES" | while read -r f; do stat -l -t '%Y-%m-%dT%H:%M:%S%z' "$f" | while read -r a b c d size dateiso filename; do echo "$filename,$size,$dateiso"; done; done
-            elif [ "$PLATFORM" = 'busybox' ]; then
-                echo "$IMAGES" | while read -r f; do ls -al --full-time "$f" | while read -r a b c d size date time timezone filename; do echo "$filename,$size,${date}T${time}${timezone}"; done; done
-            else
-                echo "$IMAGES" | while read -r f; do ls -al --time-style='+%Y-%m-%dT%H:%M:%S%z' "$f" | while read -r a b c d size dateiso filename; do echo "$filename,$size,$dateiso"; done; done
-            fi
-        )
-        INDEX_HTM="$d/index.htm"
-        cat - > "$INDEX_HTM" <<'EOF'
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -150,9 +33,7 @@ if [ -n "$GALLERY" ]; then
     <script>
         // Images
         const IMAGES_CSV = `
-EOF
-        echo "$IMAGES_CSV" >> "$INDEX_HTM"
-        cat - >> "$INDEX_HTM" <<'EOF'
+/mnt/git/theohbrothers/webize/doc/assets/gallery.gif,82852,2021-09-25T08:19:25+0000
 `;
         // Parse into image objects
         const imageObjects = (function(IMAGES_CSV) {
@@ -967,18 +848,3 @@ EOF
     </script>
 </body>
 </html>
-EOF
-        echo "$INDEX_HTM"
-    done
-fi
-
-# Remove index.htm in each directory
-if [ -n "$CLEAN" ]; then
-    echo "$DIRS" | while read -r d; do
-        INDEX_HTM="$d/index.htm"
-        if [ -f "$INDEX_HTM" ]; then
-            rm -f "$INDEX_HTM"
-            echo "$INDEX_HTM"
-        fi
-    done
-fi
