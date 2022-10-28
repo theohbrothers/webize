@@ -1,8 +1,7 @@
 /.*
-
 !/.env
 !/.github
 !/.gitignore
 !/.vscode
 
-index.htm
+/index.htm

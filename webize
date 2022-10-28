@@ -3,22 +3,19 @@
 set -u
 
 usage() {
-    echo 'Usage: ./webize.sh [OPTIONS]'
-    echo '  Subcommands:'
-    echo '      gallery             Generate a gallery index.htm'
-    echo '      clean               Removes all index.htm'
+    echo 'Usage: ./webize [OPTIONS]'
+    echo 'Subcommands:'
+    echo '    gallery <dir>          Generate a gallery index.htm'
+    echo '    clean <dir>            Removes index.htm'
     echo 'Examples: '
-    echo '      # Generate a gallery index.htm for current directory and all descendent folders which contain images'
-    echo '      ./webize.sh gallery .'
+    echo '    # Generate a gallery index.htm for current directory and all descendent folders which contain images'
+    echo '    ./webize gallery .'
     echo
-    echo '      # Generate a gallery index.htm for /path/to/camera/roll and all descendent folders which contain images, and open them in firefox'
-    echo '      ./webize.sh gallery /path/to/camera/roll | xargs firefox'
+    echo '    # Generate a gallery index.htm for /path/to/camera/roll and all descendent folders which contain images, and open them in firefox'
+    echo '    ./webize gallery /path/to/camera/roll | xargs firefox'
     echo
-    echo '      # Clean all index.htm for current directory and all descendent folders which contain images'
-    echo '      ./webize.sh clean .'
-    echo
-    echo '      # Clean all index.htm for /path/to/camera/roll and all descendent folders which contain images'
-    echo '      ./webize.sh clean /path/to/camera/roll'
+    echo '    # Clean index.htm in current directory'
+    echo '    ./webize clean .'
 }
 # Exit if we got no options
 if [ $# -eq 0 ]; then usage; exit 1; fi
@@ -73,7 +70,7 @@ if [ "$DIR" = '.' ]; then
 fi
 
 # Get directories with images
-IMAGES_REGEX='\.gif|\.jpg|\.png|\.svg|\.webp'
+IMAGES_REGEX='(\.gif|\.jpe?g|\.png|\.svg|\.webp)$'
 DIRS=$(
     find "$DIR" -type d | while read -r d; do
         if ls -p "$d" | grep -v '/' | grep -iE "$IMAGES_REGEX" > /dev/null; then
@@ -86,20 +83,22 @@ if [ -z "$DIRS" ]; then
     exit 1
 fi
 
-# Generate index.htm in each directory
+# Generate a index.htm in current directory
 if [ -n "$GALLERY" ]; then
     INDEX_HTM="index.htm"
     IMAGES_CSV=$(
         echo "$DIRS" | while read -r d; do
-
-            # Get only files, ignore the first line of ls -al, then parse file attributes into a single CSV. E.g. -rwxr-xr-x 1 packer packer 22681 2021-08-27T07:36:45+0000 webize -> webize,22681,2021-08-27T07:36:45+0000
+            # Get only files, ignore the first line of ls -al, then parse file attributes into a single CSV
+            # E.g.:
+            #   -rwxr-xr-x 1 user user 22681 2021-08-27T07:36:45+0000 webize
+            # Becomes:
+            #   webize,22681,2021-08-27T07:36:45+0000
             if echo "${OSTYPE:-}" | grep -qE 'darwin'; then
                 cd "$d"
                 files=$( stat -l -t '%Y-%m-%dT%H:%M:%S%z' * )
             else
-                files=$( ls -al --time-style='+%Y-%m-%dT%H:%M:%S%z' -p "$d" )
+                files=$( ls -al --time-style='+%Y-%m-%dT%H:%M:%S%z' -p "$d" 2>/dev/null || ls -al --full-time -p "$d" | awk '{print $1,$2,$3,$4,$5,$6$7$8,$9}' )
             fi
-
             echo "$files" | grep -v '/' | grep -iE "$IMAGES_REGEX" | while read -r l; do
                 size=$( echo "$l" | awk '{print $5}' )
                 dateiso=$( echo "$l" | awk '{print $6}' )
@@ -109,6 +108,10 @@ if [ -n "$GALLERY" ]; then
             done
         done
     )
+    if [ -z "$IMAGES_CSV" ]; then
+        echo "Couldn't obtain images' metadata"
+        exit 1
+    fi
     cat - > "$INDEX_HTM" <<'EOF'
 <html lang="en">
 <head>
@@ -920,11 +923,9 @@ fi
 
 # Remove index.htm in each directory
 if [ -n "$CLEAN" ]; then
-    echo "$DIRS" | while read -r d; do
-        INDEX_HTM="$d/index.htm"
-        if [ -f "$INDEX_HTM" ]; then
-            rm -f "$INDEX_HTM"
-            echo "$INDEX_HTM"
-        fi
-    done
+    INDEX_HTM="$DIR/index.htm"
+    if [ -f "$INDEX_HTM" ]; then
+        rm -f "$INDEX_HTM"
+        echo "$INDEX_HTM"
+    fi
 fi

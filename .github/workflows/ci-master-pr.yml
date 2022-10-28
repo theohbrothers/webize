@@ -11,8 +11,16 @@ on:
     - master
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: bats/bats:1.7.0
+    steps:
+    - uses: actions/checkout@v3
+    - run: bats *.bats
+
   update-draft-release:
-    # needs: [test-powershell-5-1-windows-2016, test-powershell-5-1-windows-2019, test-powershell-6-0, test-powershell-6-1, test-powershell-6-1, test-powershell-7-0, test-powershell-7-1, test-powershell-7-2]
+    needs: [test]
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
@@ -22,7 +30,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-draft-release:
-    # needs: [test-powershell-5-1-windows-2016, test-powershell-5-1-windows-2019, test-powershell-6-0, test-powershell-6-1, test-powershell-6-1, test-powershell-7-0, test-powershell-7-1, test-powershell-7-2]
+    needs: [test]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
