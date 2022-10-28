@@ -172,6 +172,22 @@ cat - >> "$INDEX_HTM" <<'EOF'
 
         var Helpers = (function () {
             return {
+                getBrowserScrollbarWidth: function() {
+                    // Gets the native browser's scrollbar width
+
+                    // Create a mock scrollbox
+                    var scrollDiv = document.createElement("div");
+                    scrollDiv.setAttribute('style', 'width: 100px; height: 100px; overflow: scroll; position: absolute; z-index: -1000;');
+                    document.body.appendChild(scrollDiv);
+
+                    // Get the scrollbar width
+                    var scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
+
+                    // Remove the scrollbox
+                    document.body.removeChild(scrollDiv);
+
+                    return scrollbarWidth;
+                },
                 htmlEntities: function htmlEntities(str) {
                     return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, '&#39;').replace(/"/g, '&#34;').replace(/ /g, '&nbsp;').replace(/\r?\n/g, '<br />');
                 },
@@ -470,7 +486,7 @@ cat - >> "$INDEX_HTM" <<'EOF'
                 const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
                 for (var i = 0; i < images.length; i++) {
                     images[i].parentNode.style.display = "block";
-                    images[i].parentNode.style.width = "100vw";
+                    images[i].parentNode.style.width = "100%";
                     images[i].parentNode.style.height = "auto";
                     images[i].style.width = viewportWidth + 'px';
                     images[i].style.height = "auto";
@@ -482,7 +498,7 @@ cat - >> "$INDEX_HTM" <<'EOF'
                 const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
                 for (var i = 0; i < images.length; i++) {
                     images[i].parentNode.style.display = "block";
-                    images[i].parentNode.style.width = "100vw";
+                    images[i].parentNode.style.width = "100%";
                     images[i].parentNode.style.height = "auto";
                     images[i].style.width = "auto";
                     images[i].style.height = viewportHeight + 'px';
@@ -497,8 +513,8 @@ cat - >> "$INDEX_HTM" <<'EOF'
                 for (var i = 0; i < images.length; i++) {
                     images[i].parentNode.style.display = "inline-block";
                     images[i].parentNode.style.verticalAlign = "top";
-                    images[i].parentNode.style.width = "calc(100vw / " + tileFactor + ")";
-                    images[i].parentNode.style.height = "calc(100vw / " + tileFactor + ")";
+                    images[i].parentNode.style.width = "calc(100% / " + tileFactor + ")";
+                    images[i].parentNode.style.height = "calc(100% / " + tileFactor + ")";
                     if (images[i].naturalWidth >= images[i].naturalHeight) {
                         // Landscape
                         images[i].style.width = "100%";
@@ -519,8 +535,8 @@ cat - >> "$INDEX_HTM" <<'EOF'
                 for (var i = 0; i < images.length; i++) {
                     images[i].parentNode.style.display = "inline-block";
                     images[i].parentNode.style.verticalAlign = "top";
-                    images[i].parentNode.style.width = "calc(100vw / " + tileFactor + ")";
-                    images[i].parentNode.style.height = "calc(100vw / " + tileFactor + ")";
+                    images[i].parentNode.style.width = "calc(100% / " + tileFactor + ")";
+                    images[i].parentNode.style.height = "calc(100% / " + tileFactor + ")";
                     if (images[i].naturalWidth >= images[i].naturalHeight) {
                         // Landscape
                         images[i].style.width = "100%";
@@ -592,7 +608,7 @@ cat - >> "$INDEX_HTM" <<'EOF'
                     for (var i = 0; i < images.length; i++) {
                         imageholder = images[i].parentNode;
                         imageholder.style.display = "none";
-                        imageholder.style.border = "";
+                        imageholder.style.border = "0px";
                     }
                     var activeImageholder = images[activeImageIndex].parentNode;
                     activeImageholder.style.display = "block";
