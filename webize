@@ -159,6 +159,19 @@ cat - >> "$INDEX_HTM" <<'EOF'
 
         var Helpers = (function () {
             return {
+                copyToClipboard: function(text) {
+                    var textarea = document.createElement('textarea');
+                    textarea.innerHTML = text;
+                    document.body.appendChild(textarea);
+
+                    // Synchronous copy
+                    textarea.focus();
+                    textarea.select();
+                    var result = document.execCommand('copy');
+
+                    document.body.removeChild(textarea);
+                    return result;
+                },
                 getBrowserScrollbarWidth: function() {
                     // Gets the native browser's scrollbar width
 
@@ -467,6 +480,18 @@ cat - >> "$INDEX_HTM" <<'EOF'
 
                 // Cache the image elements
                 images = rootElement.getElementsByTagName("img");
+            };
+
+            var copyActiveImageFilePath = function() {
+                var scrollTop = document.body.scrollTop; // Save the original scrollTop
+                Helpers.copyToClipboard(images[activeImageIndex].getAttribute('alt'));
+                // setActiveImageIndex(activeImageIndex, true);
+                images[activeImageIndex].style.opacity = 0.5;
+                var activeImageIndexTmp = activeImageIndex;
+                setTimeout(function() {
+                    images[activeImageIndexTmp].style.opacity = 1;
+                }, 500);
+                document.body.scrollTop = scrollTop; // Restore the original scrollTop
             };
 
             var stretchx = function() {
@@ -883,6 +908,11 @@ cat - >> "$INDEX_HTM" <<'EOF'
                 // = key
                 if (keyCode === 61) {
                     setMode("tilelarger");
+                    event.preventDefault();
+                }
+                // c key
+                if (keyCode === 67) {
+                    copyActiveImageFilePath();
                     event.preventDefault();
                 }
 

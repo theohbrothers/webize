@@ -58,14 +58,15 @@ Keyboard shortcuts:
 | BACKSPACE | Back to tile mode
 | SPACE | Next image
 | ESC | Escape from full screen, or back to tile mode
-| `F` | Mode: Full screen
-| `X` | Mode: Stretch horizontal
-| `Y` | Mode: Stretch vertical
-| `-` | Mode: Tile smaller
-| `=` | Mode: Tile larger
-| `L` | Mode: Show / Hide label
-| `S` | Mode: Toggle sort mode
-| `P` | Menu: Pin / Unpin menu
+| `F` | Full screen
+| `X` | Stretch horizontal
+| `Y` | Stretch vertical
+| `-` | Tile smaller
+| `=` | Tile larger
+| `L` | Show / Hide label
+| `S` | Toggle sort mode
+| `P` | Pin / Unpin menu
+| `C` | Copy File Path
 
 ## Development
 
