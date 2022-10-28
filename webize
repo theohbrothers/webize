@@ -466,7 +466,7 @@ cat - >> "$INDEX_HTM" <<'EOF'
                 for (var i = 0; i < images.length; i++) {
                     images[i].parentNode.style.display = "inline-block";
                     images[i].parentNode.style.width = "100vw";
-                    images[i].parentNode.style.height = "100vh";
+                    images[i].parentNode.style.height = "auto";
                     images[i].style.width = "100%";
                     images[i].style.height = "auto";
                 }
