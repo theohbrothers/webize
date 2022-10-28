@@ -94,3 +94,7 @@ cp -rf /path/to .pictures
 docker-compose up
 curl --head http://yourserver:8080/.pictures/index.htm
 ```
+
+## Known issues
+
+- High memory usage on loading `index.htm`, because the actual images are used in `<img src>`.
