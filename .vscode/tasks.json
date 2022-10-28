@@ -16,6 +16,12 @@
             "group": "build"
         },
         {
+            "label": "Test",
+            "type": "shell",
+            "command": "./test.sh",
+            "group": "build"
+        },
+        {
             "label": "./webize gallery .",
             "type": "shell",
             "command": "./webize gallery .",

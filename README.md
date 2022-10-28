@@ -73,8 +73,10 @@ Keyboard shortcuts:
 Available as [vscode tasks](.vscode/tasks.json).
 
 ```sh
-cd /path/to/webize
-# First, make some pictures available
+# Test script
+./test.sh
+
+# To test the gallery, make some pictures available
 cp -rf /path/to/pictures .pictures
 
 # Debug (Local browser)
