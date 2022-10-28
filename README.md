@@ -32,14 +32,21 @@ At present, gallery is kept as minimalistic as possible. But it might already be
 ![](doc/assets/gallery.gif)
 
 ```sh
-# Generate a `index.htm` for every descendent folder of /path/to with image files, and opens it in firefox
-webize gallery /path/to/pictures | xargs firefox
+# Linux: Generate index.htm in /path/to for all descendent image files, and opens it in firefox
+webize gallery /path/to | xargs firefox
 
-# Or, open in default web browser on a mac
-webize gallery /path/to/pictures | xargs open
+# Cleanup index.htm
+webize clean /path/to
 
-# Cleanup once you are done
-webize clean /path/to/pictures
+# Linux: Generate a scoped index.htm in each descendent folder of /path/to, and opens it in firefox
+webize gallery -s /path/to | xargs firefox
+
+# Cleanup index.htm
+webize clean -s /path/to
+
+# Mac: Generate index.htm in /path/to for all descendent image files, and opens it in firefox
+webize gallery /path/to | xargs open
+webize clean /path/to
 ```
 
 Keyboard shortcuts:
@@ -77,7 +84,7 @@ Available as [vscode tasks](.vscode/tasks.json).
 ./test.sh
 
 # To test the gallery, make some pictures available
-cp -rf /path/to/pictures .pictures
+cp -rf /path/to .pictures
 
 # Debug (Local browser)
 ./webize gallery . | xargs firefox
