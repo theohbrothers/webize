@@ -65,9 +65,7 @@ if [ ! -d "$DIR" ]; then
     echo "Directory does not exist: $DIR" 1>&2
     exit 1
 fi
-if [ "$DIR" = '.' ]; then
-    DIR="$PWD"
-fi
+DIR=$( echo "$DIR" | sed 's@/$@@' ) # Trim trailing '/'
 
 # Get directories with images
 IMAGES_REGEX='(\.gif|\.jpe?g|\.png|\.svg|\.webp)$'
@@ -109,7 +107,7 @@ if [ -n "$GALLERY" ]; then
         done
     )
     if [ -z "$IMAGES_CSV" ]; then
-        echo "Couldn't obtain images' metadata"
+        echo "No images found in: $DIR"
         exit 1
     fi
     cat - > "$INDEX_HTM" <<'EOF'
