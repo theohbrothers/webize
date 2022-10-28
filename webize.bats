@@ -31,18 +31,16 @@ teardown() {
 }
 
 @test "gallery - Generates index.htm with correct number of images" {
-    run "$BATS_TEST_DIRNAME/webize" gallery "$BATS_FILE_TMPDIR/pictures"
+    "$BATS_TEST_DIRNAME/webize" gallery "$BATS_FILE_TMPDIR/pictures" | grep index.htm
 
-    [ "$status" = 0 ]
-    [ -f index.htm ]
-    [ -s index.htm ]
-    [ $( cat index.htm | grep 'const IMAGES_CSV' -A12 | grep -Ei '(\.gif|\.jpe?g|\.png|\.svg|\.webp)$' | wc -l ) = 12 ]
+    [ -f "$BATS_FILE_TMPDIR/pictures/index.htm" ]
+    [ -s "$BATS_FILE_TMPDIR/pictures/index.htm" ]
+    [ $( cat "$BATS_FILE_TMPDIR/pictures/index.htm" | grep 'const IMAGES_CSV' -A12 | grep -Ei '(\.gif|\.jpe?g|\.png|\.svg|\.webp)' | wc -l ) = 12 ]
 }
 
 @test "clean - Cleans index.htm" {
-    touch index.htm
-    run "$BATS_TEST_DIRNAME/webize" clean .
+    touch "$BATS_FILE_TMPDIR/pictures/index.htm"
+    "$BATS_TEST_DIRNAME/webize" clean "$BATS_FILE_TMPDIR/pictures" | grep index.htm
 
-    [ "$status" = 0 ]
-    [ ! -f index.htm ]
+    [ ! -f "$BATS_FILE_TMPDIR/pictures/index.htm" ]
 }
