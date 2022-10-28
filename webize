@@ -463,8 +463,9 @@ cat - >> "$INDEX_HTM" <<'EOF'
             };
 
             var stretchx = function() {
+                const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
                 for (var i = 0; i < images.length; i++) {
-                    images[i].parentNode.style.display = "inline-block";
+                    images[i].parentNode.style.display = "block";
                     images[i].parentNode.style.width = "100vw";
                     images[i].parentNode.style.height = "auto";
                     images[i].style.width = "100%";
@@ -474,8 +475,9 @@ cat - >> "$INDEX_HTM" <<'EOF'
             };
 
             var stretchy = function() {
+                const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
                 for (var i = 0; i < images.length; i++) {
-                    images[i].parentNode.style.display = "inline-block";
+                    images[i].parentNode.style.display = "block";
                     images[i].parentNode.style.width = "100vw";
                     images[i].parentNode.style.height = "100vh";
                     images[i].style.width = "auto";
