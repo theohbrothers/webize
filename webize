@@ -769,9 +769,9 @@ cat - >> "$INDEX_HTM" <<'EOF'
                 }
             }
             // Set element of interest while scrolling
-            rootElement.addEventListener("wheel", function(e) {
-                setScopeImageAsActiveImage();
-            });
+            // rootElement.addEventListener("wheel", function(e) {
+            //     setScopeImageAsActiveImage();
+            // });
 
             var sort = function(sortMode) {
                 createImageComponents(sortMode);
