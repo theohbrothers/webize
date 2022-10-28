@@ -76,7 +76,7 @@ fi
 IMAGES_REGEX='\.gif|\.jpg|\.png|\.svg|\.webp'
 DIRS=$(
     find "$DIR" -type d | while read -r d; do
-        if ls -p "$d" | grep -v '/' | grep -E "$IMAGES_REGEX" > /dev/null; then
+        if ls -p "$d" | grep -v '/' | grep -iE "$IMAGES_REGEX" > /dev/null; then
             echo "$d"
         fi
     done | sort -n
@@ -100,7 +100,7 @@ if [ -n "$GALLERY" ]; then
                 files=$( ls -al --time-style='+%Y-%m-%dT%H:%M:%S%z' -p "$d" )
             fi
 
-            echo "$files" | grep -v '/' | grep -E "$IMAGES_REGEX" | while read -r l; do
+            echo "$files" | grep -v '/' | grep -iE "$IMAGES_REGEX" | while read -r l; do
                 size=$( echo "$l" | awk '{print $5}' )
                 dateiso=$( echo "$l" | awk '{print $6}' )
                 filename=$( echo "$l" | awk '{print $1=$2=$3=$4=$5=$6=""; print $0}' | awk NF | sed 's/^[ ]*//g' )
