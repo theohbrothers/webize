@@ -72,6 +72,7 @@ Keyboard shortcuts:
 | `S` | Toggle sort mode
 | `P` | Pin / Unpin menu
 | `C` | Copy File Path
+| `K` | Toggle whether keyboard shortcuts are enabled or disabled
 
 ## Development
 
