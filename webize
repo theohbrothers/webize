@@ -178,7 +178,6 @@ EOF
                     dateiso: fileAttr[2],
                     extension: filenameSplit[filenameSplit.length - 1],
                  });
-                 console.log(filenameSplit);
             }
 
             return imageObjects;
