@@ -910,7 +910,7 @@ EOF
                 }
                 // ESC key (if in full screen, escapes full screen first, goes back to tiled view, and tiles smaller)
                 if (keyCode === 27) {
-                    setMode("tilesmaller");
+                    setMode("tilesmaller", true);
                     event.preventDefault();
                 }
 
