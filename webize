@@ -372,7 +372,7 @@ EOF
                 toggleSortMode();
             });
 
-            var keyHandler = function(event) {
+            var keydownHandler = function(event) {
                 var ele = event.target || event.srcElement;
                 var keyCode = event.keyCode || event.charCode;
 
@@ -392,12 +392,10 @@ EOF
                 if (keyCode === 80) {
                     togglePinHandler();
                 }
-
-                // console.log(keyCode);
             };
 
             return {
-                keyHandler: keyHandler,
+                keydownHandler: keydownHandler,
                 get sortMode() {
                     return sortModes[sortModeIndex];
                 },
@@ -836,11 +834,10 @@ EOF
                 setMode(mode, true);
             }
 
-            var keyHandler = function(event) {
+            var keydownHandler = function(event) {
                 var ele = event.target || event.srcElement;
                 var keyCode = event.keyCode || event.charCode;
                 var key = event.key;
-                console.log('keyCode: ' + keyCode + ', key: ' + key);
 
                 // LEFT arrow key
                 if (keyCode === 37) {
@@ -945,8 +942,10 @@ EOF
 
                 // console.log(keyCode);
             };
-
             return {
+                get keyEnabled() {
+                    return keyEnabled;
+                },
                 get mode() {
                     return mode;
                 },
@@ -965,14 +964,96 @@ EOF
                     }
                 },
                 sort: sort,
-                keyHandler: keyHandler
+                keydownHandler: keydownHandler
             };
         })(imageObjects);
 
+        var keyController = (function() {
+            var keyEnabled = true;
+            var shiftKeyDown = false;
+            var ctrlKeyDown = false;
+            var altKeyDown = false;
+
+            var keydownHandler = function(event) {
+                var ele = event.target || event.srcElement;
+                var keyCode = event.keyCode || event.charCode;
+                var key = event.key;
+                console.log('[keydownHandler] keyCode: ' + keyCode + ', key: ' + key);
+
+                // Disable hotkeys when any of SHIFT, CTRL, ALT keys are pressed
+                if (keyCode == 16) {
+                    shiftKeyDown = true;
+                }
+                if (keyCode == 17) {
+                    ctrlKeyDown = true;
+                }
+                if (keyCode == 18) {
+                    altKeyDown = true;
+                }
+                if (shiftKeyDown || ctrlKeyDown || altKeyDown) {
+                    console.log('[keydownHandler] Disabling hotkeys');
+                    keyEnabled = false;
+                }
+
+                if (!keyEnabled) {
+                    return;
+                }
+                menu.keydownHandler(event);
+                gallery.keydownHandler(event);
+            }
+
+            var keyupHandler = function(event) {
+                var ele = event.target || event.srcElement;
+                var keyCode = event.keyCode || event.charCode;
+                var key = event.key;
+                console.log('[keyupHandler] keyCode: ' + keyCode + ', key: ' + key);
+
+                // Enable hotkeys only when SHIFT, CTRL, and ALT keys are not pressed
+                if (keyCode == 16) {
+                    shiftKeyDown = false;
+                }
+                if (keyCode == 17) {
+                    ctrlKeyDown = false;
+                }
+                if (keyCode == 18) {
+                    altKeyDown = false;
+                }
+                // If pressing SHIFT+TAB, CTRL+TAB, ALT+TAB, consider keys as not pressed
+                // if (keyCode == 9) {
+                //     console.log('[keydownHandler] TAB detected, considering all keys as not pressed');
+                //     shiftKeyDown = false;
+                //     ctrlKeyDown = false;
+                //     altKeyDown = false;
+                // }
+                if (!shiftKeyDown && !ctrlKeyDown && !altKeyDown) {
+                    console.log('[keydownHandler] Enabling hotkeys');
+                    keyEnabled = true;
+                }
+            }
+
+            var visibilityChangeHandler = function(event) {
+                console.log('[visibilitychange] visbilityState: ' + document.hidden);
+                console.log('[visibilitychange] Considering all keys as not pressed');
+                shiftKeyDown = false;
+                ctrlKeyDown = false;
+                altKeyDown = false;
+            }
+            return {
+                keydownHandler: keydownHandler,
+                keyupHandler: keyupHandler,
+                visibilityChangeHandler: visibilityChangeHandler
+            };
+        }());
+
         // App Events
         window.addEventListener("keydown", function (event) {
-            menu.keyHandler(event);
-            gallery.keyHandler(event);
+            keyController.keydownHandler(event);
+        });
+        window.addEventListener("keyup", function (event) {
+            keyController.keyupHandler(event);
+        });
+        document.addEventListener("visibilitychange", function (event) {
+            keyController.visibilityChangeHandler(event);
         });
     </script>
 </body>
