@@ -77,9 +77,11 @@ fi
 PLATFORM=linux
 if echo "${OSTYPE:-}" | grep -iE 'darwin' > /dev/null; then
     PLATFORM=darwin
-fi
-if ! ls -al --time-style='+%Y' > /dev/null 2>&1; then
+elif ! ls -al --time-style='+%Y' > /dev/null 2>&1; then
     PLATFORM=busybox
+fi
+if [ -n "$VERBOSE" ]; then
+    echo "PLATFORM=$PLATFORM"
 fi
 
 if [ -n "$SCOPED" ]; then
