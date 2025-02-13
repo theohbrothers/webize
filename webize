@@ -970,6 +970,7 @@ EOF
 
         var keyController = (function() {
             var keyEnabled = true;
+            var keyLock = false;
             var shiftKeyDown = false;
             var ctrlKeyDown = false;
             var altKeyDown = false;
@@ -980,6 +981,16 @@ EOF
                 var key = event.key;
                 console.log('[keydownHandler] keyCode: ' + keyCode + ', key: ' + key);
 
+                // 'k' key
+                if (keyCode == 75) {
+                    if (keyLock) {
+                        console.log('Disabling keylock');
+                        keyLock = false;
+                    }else {
+                        console.log('Enabling keylock');
+                        keyLock = true;
+                    }
+                }
                 // Disable hotkeys when any of SHIFT, CTRL, ALT keys are pressed
                 if (keyCode == 16) {
                     shiftKeyDown = true;
@@ -990,7 +1001,7 @@ EOF
                 if (keyCode == 18) {
                     altKeyDown = true;
                 }
-                if (shiftKeyDown || ctrlKeyDown || altKeyDown) {
+                if (keyLock || shiftKeyDown || ctrlKeyDown || altKeyDown) {
                     console.log('[keydownHandler] Disabling hotkeys');
                     keyEnabled = false;
                 }
@@ -1025,7 +1036,7 @@ EOF
                 //     ctrlKeyDown = false;
                 //     altKeyDown = false;
                 // }
-                if (!shiftKeyDown && !ctrlKeyDown && !altKeyDown) {
+                if (!keyLock && !shiftKeyDown && !ctrlKeyDown && !altKeyDown) {
                     console.log('[keydownHandler] Enabling hotkeys');
                     keyEnabled = true;
                 }
